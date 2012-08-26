@@ -1,0 +1,19 @@
+i primi 3 algoritmi funzionano solo se una delle variabili
+ha dominio == 1->scoprire perchè non sarà semplice :)
+
+
+Generazione random:
+To systematically study the scaling behavior of the algorithms, we next consider random prob-
+lems. The problems consisted of a single alldifferent constraint over n variables and each variable
+xi had its initial domain set to [a, b], where a and b, a ≤ b, were chosen uniformly at random from
+[1, n]. The problems were solved using the lexicographic variable ordering.
+
+
+
+
+TODO:
+	mettere Vector<Integer> sarebbe bello
+	rimplementare generazione random
+	implementrare backtracking	
+    finire i primi 3 algoritmi
+	leggere teoria grafi

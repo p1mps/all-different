@@ -1,0 +1,47 @@
+\documentclass[a4paper,12pt]{article} % Prepara un documento per carta A4, con un bel font grande
+% impostazioni generali del documento, valide per tutti gli scritti.
+\usepackage[babel]{csquotes}
+\usepackage[style=numeric]{biblatex}  
+
+\usepackage{graphicx} % per l'inserimento di immagini.
+\usepackage{listings}
+\usepackage[italian]{babel} % Adatta LaTeX alle convenzioni tipografiche italiane,
+% e ridefinisce alcuni titoli in italiano, come "Capitolo" al posto di "Chapter", se il vostro documento in italiano
+\usepackage[utf8]{inputenc} % Consente l'uso caratteri accentati italiani
+\usepackage{amsfonts}
+
+\usepackage{fancyhdr} % per il controllo delle intestazioni.
+\usepackage{totpages} % macro per conoscere il tatale delle pagine
+\usepackage{longtable} % tabelle che vanno su pi� pagine
+\frenchspacing % forza LaTeX ad una spaziatura fra parole non inglesi
+
+\pagestyle{fancy}
+
+\newcommand{\linkref}[1]{{\footnotesize \textsl{#1}}}
+
+% fine delle impostazioni generali
+\bibliography{relazione}
+\newtoks\titolo % definisco un nuovo comando \titolo che restituisce il titolo.
+\newtoks\versione % definisco un nuovo comando \versione che restituisce il versione.
+\newtoks\data   % definisco un nuovo comando \data che restituisce la data.
+
+\titolo={All different constraint solver} % inserire qui il titolo
+
+\data={\today}       % today restituisce il valore del giorno in cui si genera il pdf.
+
+\title{\bf \the\titolo}
+\author{Andrea Imparato\thanks{M: 623480 - E: imparato.andrea@gmail.com}}               
+\date{\today}
+
+\input{intestazione.tex} % inserisco le intestazioni del doc: logo, nome etc..
+
+\begin{document}
+
+\input{prima_pagina.tex}
+
+
+\printbibliography
+
+
+
+\end{document}
