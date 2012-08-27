@@ -99,24 +99,26 @@ public class CSP {
 			}
 			
 		}
+
+		if(q.size() == constraint.getVariables().size())
+			return true;
 		
-		int i = 0;
+		
 	
 		System.out.println("Problema da vedere se è consistente");
 		System.out.println(this);
 		
 		while(q.isEmpty() == false){
-			for (int j = 0; j < q.size(); j++) {
-				System.out.println("variabile in q " + q.get(j));
-			}
-			System.out.println("i="+i+" q="+q.size());
-			if(this.checkSolution())
-				return true;
 			
-			Variable xi = (Variable) q.get(i);
-			q.remove(i);
-			for (int j = i+1; j < constraint.getVariables().size() - i; j++) {
-				if(constraint.getVariables().get(j).getDomain().intersect(xi.getDomain()) && constraint.getVariables().get(j).getValue().equals(new Integer(-1)) == true){
+			//prendo xi primo elemento della coda q
+			Variable xi = (Variable) q.firstElement();
+			//la rimuovo dalla coda
+			q.remove(0);
+			//indice della variabile
+			int i = xi.getId();
+
+			for (int j = 0; j < constraint.getVariables().size() - i; j++) {
+				if(constraint.getVariables().get(j).getDomain().intersect(xi.getDomain())){
 					//System.out.println(constraint.getVariables().get(j));
 					//System.out.println(xi.getDomain().getValues() + " " + j);
 					constraint.getVariables().get(j).getDomain().removeValues(xi.getDomain());
@@ -130,10 +132,6 @@ public class CSP {
 			}
 			
 			
-			i++;
-			
-			if(i == q.size())
-				i = 0;
 				
 			}
 			
@@ -177,15 +175,8 @@ public class CSP {
 				Integer valueBefore = constraint.getVariables().get(j).getDomain().getValues().get(d);
 				//rimuovo valore d dal dominio
 				dBefore.removeValue(d);
+				System.out.println("rimosso valore " + constraint.getVariables().get(j).getDomain().getValues().get(d));		
 				
-				
-				//nuovo dominio variabile {d}
-				Vector<Integer> domainValue = new Vector<Integer>();
-				domainValue.add(valueBefore);
-				Domain newDomain = new Domain();
-				newDomain.setValues(domainValue);
-				constraint.getVariables().get(j).setDomain(newDomain);
-				constraint.getVariables().get(j).setValue(valueBefore);
 				
 				
 				//System.out.println(constraint.getVariables().get(j));
@@ -193,7 +184,17 @@ public class CSP {
 				
 				
 				if(consistentArcConsistency()){				
-									
+					
+					//nuovo dominio variabile {d}
+					Vector<Integer> domainValue = new Vector<Integer>();
+					domainValue.add(valueBefore);
+					Domain newDomain = new Domain();
+					newDomain.setValues(domainValue);
+					constraint.getVariables().get(j).setDomain(newDomain);
+					constraint.getVariables().get(j).setValue(valueBefore);
+
+
+
 					if(j == constraint.getVariables().size() - 1){
 						success = true;
 					}
