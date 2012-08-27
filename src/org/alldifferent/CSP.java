@@ -94,15 +94,16 @@ public class CSP {
 		//le variabili che hanno |D(x_i)=1| posso prenderle subito
 		for(int i = 0; i < constraint.getVariables().size(); i++){
 			if(constraint.getVariables().get(i).getDomain().getValues().size() == 1){
-				 
+				System.out.println("metto nella coda "+i);
 				q.add(constraint.getVariables().get(i)); 
 			}
 			
 		}
 
-		if(q.size() == constraint.getVariables().size())
+		if(q.size() == constraint.getVariables().size()){
+			System.out.println("ritorno true");
 			return true;
-		
+		}
 		
 	
 		System.out.println("Problema da vedere se è consistente");
@@ -116,9 +117,12 @@ public class CSP {
 			q.remove(0);
 			//indice della variabile
 			int i = xi.getId();
-
-			for (int j = 0; j < constraint.getVariables().size() - i; j++) {
-				if(constraint.getVariables().get(j).getDomain().intersect(xi.getDomain())){
+			
+			
+			for (int j = i+1; j < constraint.getVariables().size(); j++) {
+				
+				if(xi.getDomain().intersect(constraint.getVariables().get(j).getDomain()) && j != i){
+					System.out.println(j + " " + i);
 					//System.out.println(constraint.getVariables().get(j));
 					//System.out.println(xi.getDomain().getValues() + " " + j);
 					constraint.getVariables().get(j).getDomain().removeValues(xi.getDomain());
@@ -162,6 +166,7 @@ public class CSP {
 	//parametro enum per scegliere il Domain filter
 	public void backtracking(int j,boolean success){
 		
+		
 		System.out.println("seleziono variabile " +j);
 		
 		while(constraint.getVariables().get(j).getDomain().isEmpty() == false && success == false){
@@ -174,9 +179,14 @@ public class CSP {
 				//valore finale variabile se success diventa true
 				Integer valueBefore = constraint.getVariables().get(j).getDomain().getValues().get(d);
 				//rimuovo valore d dal dominio
-				dBefore.removeValue(d);
-				System.out.println("rimosso valore " + constraint.getVariables().get(j).getDomain().getValues().get(d));		
-				
+				constraint.getVariables().get(j).getDomain().removeValue(d);
+				//System.out.println("rimosso valore " + constraint.getVariables().get(j).getDomain().getValues().get(d));		
+				Vector<Integer> domainValue = new Vector<Integer>();
+				domainValue.add(valueBefore);
+				Domain newDomain = new Domain();
+				newDomain.setValues(domainValue);
+				constraint.getVariables().get(j).setDomain(newDomain);
+				constraint.getVariables().get(j).setValue(valueBefore);
 				
 				
 				//System.out.println(constraint.getVariables().get(j));
@@ -186,34 +196,37 @@ public class CSP {
 				if(consistentArcConsistency()){				
 					
 					//nuovo dominio variabile {d}
-					Vector<Integer> domainValue = new Vector<Integer>();
-					domainValue.add(valueBefore);
-					Domain newDomain = new Domain();
-					newDomain.setValues(domainValue);
-					constraint.getVariables().get(j).setDomain(newDomain);
-					constraint.getVariables().get(j).setValue(valueBefore);
+					
 
 
 
 					if(j == constraint.getVariables().size() - 1){
+						System.out.println("sono arrivato alla fine!");
+						//constraint.getVariables().get(j).setValue(constraint.getVariables().get(j).getDomain().getValues().get(0));
 						success = true;
+						
 					}
 					
 					if(success == false){
 						//constraint.getVariables().get(j).setDomain(dBefore);
-						System.out.println("faccio backtracking");
+						System.out.println("faccio backtracking "+ j);
 						backtracking(j + 1, success);
+						return;
 						
 					}
 				}
-				constraint.getVariables().get(j).setDomain(dBefore);
+				//constraint.getVariables().get(j).setDomain(dBefore);
 				constraint.getVariables().get(j).setValue(new Integer(-1));
 				
 			}
 			
 		}
-		
+
+
 	}
+		
+		
+	
 	
 	public String toString() {
 		
@@ -250,9 +263,9 @@ public class CSP {
 		dX3.setValues(valuesX3);
 		
 		
-		Variable x1 = new Variable(1,dX1);
-		Variable x2 = new Variable(2,dX2);
-		Variable x3 = new Variable(3,dX3);
+		Variable x1 = new Variable(0,dX1);
+		Variable x2 = new Variable(1,dX2);
+		Variable x3 = new Variable(2,dX3);
 		
 		constraint.addVariable(x1); 
 		constraint.addVariable(x2);

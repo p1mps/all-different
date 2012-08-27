@@ -72,7 +72,7 @@ public class Variable {
 		return value;
 	}
 
-
+	//settare dominio a 0!
 	public void setValue(Integer value) {
 		this.value = value;
 	}
