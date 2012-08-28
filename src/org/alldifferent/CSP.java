@@ -230,7 +230,7 @@ public class CSP {
 			
 			//costruisco il grafo G bipartito con variabili e domini (con rispettivi valori)
 			
-			//calcolo il maximum maching M in G
+			//calcolo il maximum matching M in G
 			
 			//se la cardinalità di M è minore del numero di variabili ritorno falso perchè non ho speranza di trovare una soluzione, 
 			//in quanto non riesco a raggiungere tutte le variabili.
