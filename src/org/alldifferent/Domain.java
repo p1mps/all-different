@@ -54,10 +54,10 @@ public class Domain {
 
 	//toglie da this tutti i valori che ci sono sia in d che in this
 	public void removeValues(Domain d){
-		System.out.println("rimuovo valori");
+		//System.out.println("rimuovo valori");
 		for(int i = 0; i < d.getSize(); i++){
 			if(this.getValues().contains(d.getValues().get(i)) == true){
-				System.out.println(d.getValues().get(i));
+				//System.out.println(d.getValues().get(i));
 				values.remove(d.getValues().get(i));
 			}
 		}	
