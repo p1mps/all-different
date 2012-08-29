@@ -228,7 +228,7 @@ public class CSP {
 	//implementazione quarto algoritmo
 		public boolean hyperArcConsistency() {
 			
-			//costruisco il grafo G bipartito con variabili e domini (con rispettivi valori)
+			// ok costruisco il grafo G bipartito con variabili e domini (con rispettivi valori) 
 			
 			//calcolo il maximum matching M in G
 			

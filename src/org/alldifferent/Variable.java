@@ -32,8 +32,9 @@ public class Variable {
 	public String toString() {
 		
 		String s = "";
-		s = s + "variable x" + id + " ";
-		s = s + "domain: {";
+		s = s + "x" + id + " ";
+		//s = s + "variable x" + id + " ";
+		/*s = s + "domain: {";
 		
 		for(int i = 0; i < domain.getSize(); i++){
 			s = s + domain.getValues().get(i);
@@ -41,7 +42,7 @@ public class Variable {
 				s = s + ",";
 		}
 		
-		s = s + "}";
+		s = s + "}";*/
 		
 		if(value.equals(new Integer(-1)) == false){
 			s = s + "\n";
