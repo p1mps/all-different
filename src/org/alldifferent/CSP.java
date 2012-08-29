@@ -18,7 +18,7 @@ public class CSP {
 	private ConstraintAllDifferent constraint;
 	//tempi per la risoluzione dei problemi
 	private Vector<Long> finishedTimes = new Vector<Long>();
-	
+	private boolean consistent = false;
 	//file di log
 	private FileWriter fstreamlog; 
 	private BufferedWriter outlog;
@@ -61,6 +61,11 @@ public class CSP {
 			outlog.newLine();
 			outlog.write(s);
 			System.out.println("tempo: "+s);
+			for (int i = 0; i < constraint.getVariables().size(); i++) {
+				if(constraint.getVariables().get(i).getDomain().getValues().size() > 1)
+					System.out.println("ERROREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE");
+				
+			}
 			outlog.newLine();
 			outlog.close();
 		} catch (IOException e) {
@@ -139,8 +144,9 @@ public class CSP {
 			CSP copy = new CSP(this);
 			cronometro.avanza();
 			finishedTimes.add(cronometro.leggi());
-			
+			System.out.println("prima " +this);
 			this.backtracking(0, false, copy);
+			System.out.println("dopo " +this);
 			long lettura = cronometro.leggi();
 			finishedTimes.add(lettura);
 			
@@ -251,7 +257,10 @@ public class CSP {
 
 
 	public void printSolution() {
-
+		
+		for (int i = 0; i < constraint.getVariables().size(); i++) {
+			System.out.println(constraint.getVariables().get(i));
+		}
 
 	}
 
@@ -279,7 +288,7 @@ public class CSP {
 		boolean consistency = true;
 
 		for (int i = 0; i < constraint.getVariables().size() && consistency; i++) {
-			if(constraint.getVariables().get(i).getDomain().isEmpty())
+			if(constraint.getVariables().get(i).getDomain().getValues().size()!=1)
 				consistency = false;
 		}
 		return consistency;
@@ -295,35 +304,46 @@ public class CSP {
 
 		while(j < constraint.getVariables().size() && !success){
 
-			for (int d = 0; d < constraint.getVariables().get(j).getDomain().getValues().size() && !success; d++) {
+			for (int d = 0; d < constraint.getVariables().get(j).getDomain().getValues().size() && j < constraint.getVariables().size() && !success; d++) {
 
-
+				System.out.println("variabile "+  j+ " vale " +constraint.getVariables().get(j).getDomain().getValues().get(d));
 				//se sono all'inizio devo salvarmi i domini
-				if(j == constraint.getVariables().size() -1 && consistent()){
-					//					System.out.println("ho finito!");
+				
+				if(j == constraint.getVariables().size() -1 && consistentArcConsistency()){
+					System.out.println("ho finito!");
+					this.consistent = true;
 					success = true;
 					return;
 				}
 				else{
 					//xj = {d}
+					if(constraint.getVariables().get(j).getDomain().getValues().size() > 0){
 					Domain newDomain = new Domain();
 					Vector<Integer> values = new Vector<Integer>();
+					
 					values.add(constraint.getVariables().get(j).getDomain().getValues().get(d));
 					newDomain.setValues(values);
 					constraint.getVariables().get(j).setDomain(newDomain);
 					//System.out.println("copia csp2" + copy);
-
-					if(consistentArcConsistency()){
+					}
+					if(consistentArcConsistency() && consistent()){
+						System.out.println("backtracking\n"+this);
+						
 						backtracking(j+1, success,copy);
 						//System.out.println("consistente");
 					}
 					else{
-						//						System.out.println("ricopio csp");
+						//System.out.println("ricopio csp" + copy);
+						//DEVO COPIARE DA J AL SIZE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 						this.setConstraint(new ConstraintAllDifferent(copy.getConstraint()));
+						this.constraint.getVariables().get(j).getDomain().removeValue(d);
+						
+						copy = new CSP(this);
+						//copy = new CSP(this);
 						//						System.out.println("copia csp" + copy);
 						//						System.out.println("nuovo csp" + this);
 					}
-
+				
 				}
 
 			}
@@ -426,7 +446,8 @@ public class CSP {
 	public String toString() {
 
 		String s = "";
-		s = constraint.toString();
+		s = s + constraint.toString();
+		s = s + "consistent: " + consistent;
 		return s;
 	}
 
@@ -438,13 +459,14 @@ public class CSP {
 		Vector<Integer> valuesX2 = new Vector<Integer>();
 		Vector<Integer> valuesX3 = new Vector<Integer>();
 
-		valuesX1.add(0);
+		//valuesX1.add(0);
 		valuesX1.add(1);
 		valuesX1.add(2);
-		valuesX2.add(0);
+		
 		valuesX2.add(1);
 		valuesX2.add(2);
-		valuesX3.add(0);
+		valuesX3.add(2);
+		//valuesX3.add(0);
 		//				valuesX3.add(1);
 		//				valuesX3.add(2);
 		//				
@@ -476,13 +498,18 @@ public class CSP {
 		//		System.out.println(c);
 		//		success = c.consistent();
 		//		System.out.println(success);
-		c.createFiles();
-		
-		for (int i = 1; i < 100; i++) {
+//		c.createFiles();
+//		
+		for (int i = 3; i < 5; i++) {
 			c.generateRandom(i);	
 		}
-		
-
+		c.setConstraint(constraint);
+		CSP copy = new CSP(c);
+		System.out.println(c);
+		boolean success = false;
+		c.backtracking(0, success, copy);
+		System.out.println(c);
+		System.out.println(success);
 	}
 
 
@@ -493,6 +520,14 @@ public class CSP {
 
 	public void setConstraint(ConstraintAllDifferent constraint) {
 		this.constraint = constraint;
+	}
+
+	public boolean isConsistent() {
+		return consistent;
+	}
+
+	public void setConsistent(boolean consistent) {
+		this.consistent = consistent;
 	}
 
 
