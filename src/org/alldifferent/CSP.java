@@ -1,5 +1,7 @@
 package org.alldifferent;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Calendar;
 import java.util.Vector;
 
@@ -7,9 +9,20 @@ public class CSP {
 
 	
 	private ConstraintAllDifferent constraint;
-	//private long finishedTime = 0;
+	private Vector<Long> finishedTimes = new Vector<Long>();
 	
-	
+
+	public CSP() {
+		// TODO Auto-generated constructor stub
+		
+	}
+
+	public CSP(CSP c) {
+		// TODO Auto-generated constructor stub
+		this.constraint = new ConstraintAllDifferent(c.getConstraint());
+	}
+
+
 	/**
 	 * @param args
 	 */
@@ -71,13 +84,18 @@ public class CSP {
 		int k = 0;
 		
 		for (int i = 0; i < constraint.getVariables().size(); i++) {
-			if(constraint.getVariables().get(i).getValue().equals(new Integer(-1)) == false)
+			if(constraint.getVariables().get(i).getDomain().getValues().size() == 1)
 				k = k+1;
 			
 		}
+		boolean ok = false;
+		//System.out.println("check solution: " + constraint.getVariables().size() + " " + k);
 		
-		System.out.println("check solution: " + constraint.getVariables().size() + " " + k);
-		return k == constraint.getVariables().size() -1;
+		if(k == constraint.getVariables().size())
+			ok = true;
+		
+		return ok;
+		
 		
 	}
 	
@@ -94,21 +112,17 @@ public class CSP {
 		//le variabili che hanno |D(x_i)=1| posso prenderle subito
 		for(int i = 0; i < constraint.getVariables().size(); i++){
 			if(constraint.getVariables().get(i).getDomain().getValues().size() == 1){
-				System.out.println("metto nella coda "+i);
+				//System.out.println("metto nella coda "+constraint.getVariables().get(i));
 				q.add(constraint.getVariables().get(i)); 
 			}
 			
 		}
 
-		if(q.size() == constraint.getVariables().size()){
-			System.out.println("ritorno true");
-			return true;
-		}
-		
 	
-		System.out.println("Problema da vedere se è consistente");
-		System.out.println(this);
-		
+	
+//		System.out.println("Problema da vedere se è consistente");
+//		System.out.println(this);
+//		
 		while(q.isEmpty() == false){
 			
 			//prendo xi primo elemento della coda q
@@ -117,12 +131,12 @@ public class CSP {
 			q.remove(0);
 			//indice della variabile
 			int i = xi.getId();
-			
+			//System.out.println("controllo "+xi + " id:"+i+ " "+constraint.getVariables().size());
 			
 			for (int j = i+1; j < constraint.getVariables().size(); j++) {
-				
-				if(xi.getDomain().intersect(constraint.getVariables().get(j).getDomain()) && j != i){
-					System.out.println(j + " " + i);
+				//System.out.println("con "+constraint.getVariables().get(j));
+				if(xi.getDomain().intersect(constraint.getVariables().get(j).getDomain())){
+					//System.out.println(j + " " + i);
 					//System.out.println(constraint.getVariables().get(j));
 					//System.out.println(xi.getDomain().getValues() + " " + j);
 					constraint.getVariables().get(j).getDomain().removeValues(xi.getDomain());
@@ -139,9 +153,8 @@ public class CSP {
 				
 			}
 			
-		System.out.println("Problema reso consistente");
-		System.out.println(this);
-			
+//		System.out.println("Problema reso consistente");		System.out.println(this);
+//			
 		return true;
 		
 	}
@@ -149,83 +162,175 @@ public class CSP {
 	
 	public void printSolution() {
 		
-		boolean success = false;
-		this.backtracking(0, success);
+	
+	}
+	
+	//reset variabili da posizione j
+	public void resetVariables(Vector<Variable> v,int j) {
 		
-		if(success)
-			System.out.println("FOUND SOLUTION!");
-		
-		for (int i = 0; i < constraint.getVariables().size(); i++) {
-			System.out.println(constraint.getVariables().get(i));
+		for (int i = 0; i < v.size(); i++) {
+			
+				
+				System.out.println("vecchia variabile "+constraint.getVariables().get(i) );
+				
+				
+				constraint.getVariables().insertElementAt(v.get(i), i);
+				constraint.getVariables().remove(i);
+				System.out.println("nuova variabile "+constraint.getVariables().get(i));
 			
 		}
+		
+		
+	}
+	
+	
+	public boolean consistent() {	
+		
+		boolean consistency = true;
+		
+		for (int i = 0; i < constraint.getVariables().size() && consistency; i++) {
+			if(constraint.getVariables().get(i).getDomain().isEmpty())
+				consistency = false;
+		}
+		return consistency;
+		
 	}
 	
 	//j indice variabile success booleano per la ricorsione
 	//call backtracking(0,false);
 	//parametro enum per scegliere il Domain filter
-	public void backtracking(int j,boolean success){
+	public void backtracking(int j,boolean success,CSP copy){
 		
+		System.out.println("copia csp1" + copy);
 		
-		System.out.println("seleziono variabile " +j);
-		
-		while(constraint.getVariables().get(j).getDomain().isEmpty() == false && success == false){
+		while(j < constraint.getVariables().size() && !success){
 			
-			for(int d = 0; d < constraint.getVariables().get(j).getDomain().getValues().size(); d++){
-				
-				//System.out.println("setto valore " +d);
-				//salvo dominio
-				Domain dBefore = constraint.getVariables().get(j).getDomain();
-				//valore finale variabile se success diventa true
-				Integer valueBefore = constraint.getVariables().get(j).getDomain().getValues().get(d);
-				//rimuovo valore d dal dominio
-				constraint.getVariables().get(j).getDomain().removeValue(d);
-				//System.out.println("rimosso valore " + constraint.getVariables().get(j).getDomain().getValues().get(d));		
-				Vector<Integer> domainValue = new Vector<Integer>();
-				domainValue.add(valueBefore);
-				Domain newDomain = new Domain();
-				newDomain.setValues(domainValue);
-				constraint.getVariables().get(j).setDomain(newDomain);
-				constraint.getVariables().get(j).setValue(valueBefore);
-				
-				
-				//System.out.println(constraint.getVariables().get(j));
-				
-				
-				
-				if(consistentArcConsistency()){				
-					
-					//nuovo dominio variabile {d}
-					
+			for (int d = 0; d < constraint.getVariables().get(j).getDomain().getValues().size() && !success; d++) {
 
 
-
-					if(j == constraint.getVariables().size() - 1){
-						System.out.println("sono arrivato alla fine!");
-						//constraint.getVariables().get(j).setValue(constraint.getVariables().get(j).getDomain().getValues().get(0));
-						success = true;
-						
-					}
-					
-					if(success == false){
-						//constraint.getVariables().get(j).setDomain(dBefore);
-						System.out.println("faccio backtracking "+ j);
-						backtracking(j + 1, success);
-						return;
-						
-					}
+				//se sono all'inizio devo salvarmi i domini
+				if(j == constraint.getVariables().size() -1 && consistent()){
+					System.out.println("ho finito!");
+					success = true;
+					return;
 				}
-				//constraint.getVariables().get(j).setDomain(dBefore);
-				constraint.getVariables().get(j).setValue(new Integer(-1));
-				
+				else{
+					//xj = {d}
+					Domain newDomain = new Domain();
+					Vector<Integer> values = new Vector<Integer>();
+					values.add(constraint.getVariables().get(j).getDomain().getValues().get(d));
+					newDomain.setValues(values);
+					constraint.getVariables().get(j).setDomain(newDomain);
+					System.out.println("copia csp2" + copy);
+
+					if(consistentArcConsistency()){
+						backtracking(j+1, success,copy);
+						System.out.println("consistente");
+					}
+					else{
+						System.out.println("ricopio csp");
+						this.setConstraint(new ConstraintAllDifferent(copy.getConstraint()));
+						System.out.println("copia csp" + copy);
+						System.out.println("nuovo csp" + this);
+					}
+
+				}
+
 			}
-			
+
+			j++;
+
+
 		}
 
-
 	}
+			
+			
 		
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+//		
+//		System.out.println("seleziono variabile " +j);
+//		
+//		while(constraint.getVariables().get(j).getDomain().isEmpty() == false && success == false){
+//			
+//			for(int d = 0; d < constraint.getVariables().get(j).getDomain().getValues().size() && success == false; d++){
+//				
+//				//System.out.println("setto valore " +constraint.getVariables().get(j).getDomain().getValues().get(d));
+//				//salvo dominio
+//				System.out.println(d);
+//				//valore finale variabile se success diventa true
+//				Integer valueBefore = constraint.getVariables().get(j).getDomain().getValues().get(d);
+//				//rimuovo valore d dal dominio
+//				constraint.getVariables().get(j).getDomain().removeValue(d);
+//				
+//				
+//				
+//				Domain dBefore = constraint.getVariables().get(j).getDomain();
+//				//System.out.println("rimosso valore "+constraint.getVariables().get(j));
+//				//nuovo dominio variabile {d}
+//				
+//				if(consistent()){
+//				
+//					success = (j == constraint.getVariables().size()-1);
+//					Vector<Integer> domainValue = new Vector<Integer>();
+//					domainValue.add(valueBefore);
+//					Domain newDomain = new Domain();
+//					newDomain.setValues(domainValue);
+//					constraint.getVariables().get(j).setDomain(newDomain);
+////					System.out.println("nuova variabile "+constraint.getVariables().get(j));
+////					System.out.println("nuovo dominio variabile  "+newDomain.toString());
+//					constraint.getVariables().get(j).setValue(valueBefore);
+//					System.out.println("success è false!");
+//				
+//				//System.out.println(constraint.getVariables().get(j));
+//					if(success == false){
+//						
+//					
+//						
+//						//constraint.getVariables().get(j).setDomain(dBefore);
+//						System.out.println("faccio backtracking "+ j);
+//						//System.out.println(constraint.getVariables().size());
+//						backtracking(j + 1, success);
+//						System.out.println(this);
+//						//devo risistemare i domini
+//						//success = true;
+//						//System.out.println("dopo ricorsione "+success);
+//						//constraint.getVariables().get(j).setDomain(dBefore);
+//						
+//					}
+//					//constraint.getVariables().get(j).setValue(valueBefore);
+//					
+//						
+//						
+//					
+//
+//					
+//				}
+//				
+//				//resetVariables(variables,j+1);
+//				
+//
+//				//constraint.getVariables().get(j).setValue(new Integer(-1));
+//				
+//			}
+//			
+//		}
+		
+
+	
+		
+	
 	
 	
 	public String toString() {
@@ -236,49 +341,52 @@ public class CSP {
 	}
 	
 	public static void main(String[] args) {
-
-		CSP c = new CSP();
-		ConstraintAllDifferent constraint = new ConstraintAllDifferent();
-		Vector<Integer> valuesX1 = new Vector<Integer>();
-		Vector<Integer> valuesX2 = new Vector<Integer>();
-		Vector<Integer> valuesX3 = new Vector<Integer>();
-		
-		valuesX1.add(0);
-		valuesX1.add(1);
-		valuesX1.add(2);
-		valuesX2.add(0);
-		valuesX2.add(1);
-		valuesX2.add(2);
-		valuesX3.add(0);
-		valuesX3.add(1);
-		valuesX3.add(2);
-		valuesX3.add(3);
-		
-		Domain dX1 = new Domain();
-		Domain dX2 = new Domain();
-		Domain dX3 = new Domain();
-		
-		dX1.setValues(valuesX1);
-		dX2.setValues(valuesX2);
-		dX3.setValues(valuesX3);
-		
-		
-		Variable x1 = new Variable(0,dX1);
-		Variable x2 = new Variable(1,dX2);
-		Variable x3 = new Variable(2,dX3);
-		
-		constraint.addVariable(x1); 
-		constraint.addVariable(x2);
-		constraint.addVariable(x3);
-		
-		c.setConstraint(constraint);
-		System.out.println(c);
-		boolean success = false;
-		c.backtracking(0, success);
-		System.out.println(success);
-		System.out.println(c);
-		c.printSolution();
-		
+			CSP c = new CSP();
+			
+				ConstraintAllDifferent constraint = new ConstraintAllDifferent();
+				Vector<Integer> valuesX1 = new Vector<Integer>();
+				Vector<Integer> valuesX2 = new Vector<Integer>();
+				Vector<Integer> valuesX3 = new Vector<Integer>();
+				
+				valuesX1.add(0);
+				valuesX1.add(1);
+				valuesX1.add(2);
+				valuesX2.add(0);
+				valuesX2.add(1);
+				valuesX2.add(2);
+				valuesX3.add(0);
+//				valuesX3.add(1);
+//				valuesX3.add(2);
+//				
+				
+				Domain dX1 = new Domain();
+				Domain dX2 = new Domain();
+				Domain dX3 = new Domain();
+				
+				dX1.setValues(valuesX1);
+				dX2.setValues(valuesX2);
+				dX3.setValues(valuesX3);
+				
+				
+				Variable x1 = new Variable(0,dX1);
+				Variable x2 = new Variable(1,dX2);
+				Variable x3 = new Variable(2,dX3);
+				
+				constraint.addVariable(x1); 
+				constraint.addVariable(x2);
+				constraint.addVariable(x3);
+				
+				c.setConstraint(constraint);
+				System.out.println(c);
+				
+				boolean success = false;
+				CSP copy = new CSP(c);
+				c.backtracking(0, success,copy);
+				
+				System.out.println(c);
+				success = c.consistent();
+				System.out.println(success);
+				
 	}
 
 
