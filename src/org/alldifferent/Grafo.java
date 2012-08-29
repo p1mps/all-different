@@ -3,6 +3,8 @@
  */
 package org.alldifferent;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -46,7 +48,7 @@ public class Grafo {
 		valuesX1.add(0);
 		valuesX1.add(1);
 		valuesX1.add(2);
-		valuesX2.add(0);
+		valuesX2.add(3);
 		valuesX2.add(1);
 		valuesX2.add(2);
 		valuesX3.add(0);
@@ -64,9 +66,9 @@ public class Grafo {
 
 		//definisco le variabili
 		Vector<Variable> vars = new Vector<Variable>();
-		vars.add(0, new Variable(0,dX1));
-		vars.add(1, new Variable(1,dX1));
-		vars.add(2, new Variable(2,dX1));
+		vars.add(0, new Variable(1,dX1));
+		vars.add(1, new Variable(2,dX2));
+		vars.add(2, new Variable(3,dX3));
 		
 		Grafo g = new Grafo();
 		g.createBipartiteGraph(nValuesVars, nValuesDms, vars);
@@ -88,15 +90,20 @@ public class Grafo {
 
         Object sourceVertex;
         Object targetVertex;
+        
+        //ciclo sugli archi legati al nodo
         for (DefaultEdge e : relatedEdges) {
+        	
+        	//ricavo sorgente e destinazione
             sourceVertex = completeGraph.getEdgeSource(e);
             targetVertex = completeGraph.getEdgeTarget(e);
-            if (sourceVertex.equals(oldVertex)
-                && targetVertex.equals(oldVertex))
-            {
+            
+            //caso in cu ci sia un loop
+            if (sourceVertex.equals(oldVertex) && targetVertex.equals(oldVertex)) {
                 completeGraph.addEdge(newVertex, newVertex);
-            } else {
-                if (sourceVertex.equals(oldVertex)) {
+            } 
+            else {
+                if (sourceVertex.equals(oldVertex) ) {
                     completeGraph.addEdge(newVertex, targetVertex);
                 } else {
                     completeGraph.addEdge(sourceVertex, newVertex);
@@ -132,13 +139,32 @@ public class Grafo {
 		for (Object vertex : vertices) {
 			//devo castare a Object per vincolo sul tipo
 			if(completeGraph.edgesOf(vertex).size() == nValuesDms && i != nValuesDms) {
-				replaceVertex(vertex, (Object) vars.get(i));
+				replaceVertex(vertex, vars.get(i));
 				i++;
 			}
 			else {
 				replaceVertex(vertex, (Object) counter++);
 			}
 		}
+		
+		//Sistemo il grafo con i domini delle variabili
+		Set<DefaultEdge> temp = new HashSet<DefaultEdge>();
+		Set<DefaultEdge> allEdge = completeGraph.edgeSet();
+		
+		//ciclo su ogni arco e controllo se il valore target è contenuto nel dominio della variabile
+		//altrimenti rimuovo l'arco dal grafo
+		for(DefaultEdge e : allEdge) {
+			Variable source = (Variable) completeGraph.getEdgeSource(e);
+			Integer target = (Integer) completeGraph.getEdgeTarget(e);
+			System.out.println("Valore nel dominio: " + source.getDomain().getValues());
+			System.out.println("Valore target: " + target.intValue());
+			if(!source.getDomain().getValues().contains(target)) {
+				temp.add(e);
+			}
+			
+		}
+		
+		completeGraph.removeAllEdges(temp);
 
 		printGraph();
 

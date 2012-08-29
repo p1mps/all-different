@@ -226,24 +226,24 @@ public class CSP {
 	}
 		
 	//implementazione quarto algoritmo
-		public boolean hyperArcConsistency() {
-			
-			// ok costruisco il grafo G bipartito con variabili e domini (con rispettivi valori) 
-			
-			//calcolo il maximum matching M in G
-			
-			//se la cardinalità di M è minore del numero di variabili ritorno falso perchè non ho speranza di trovare una soluzione, 
-			//in quanto non riesco a raggiungere tutte le variabili.
-			
-			//marco tutti gli archi in G_m che non sono in M come NON USATI
-			//calcono la SCC (componenti fortemente connesse) in G_m e marco tutti gli archi in SCC come USATI
-			//uso la ricerca in ampiezza per G_m iniziando dai veritici M-free (nodi isolati fuori da M) e marco gli archi attraversati come USATI
-		
-			//ciclo su tutti gli archi (x,d) non usati in G_m, e agisco sui domini togliendo "d" dal dominio di x.
-			//se qualche dominio diventa vuoto ritorno false altrimenti ho ottenuto la consistenza sugli iperarchi del vincolo
-			
-			return true;
-		}	
+	public boolean hyperArcConsistency() {
+
+		// OK costruisco il grafo G bipartito con variabili e domini (con rispettivi valori) 
+
+		//calcolo il maximum matching M in G
+
+		//se la cardinalità di M è minore del numero di variabili ritorno falso perchè non ho speranza di trovare una soluzione, 
+		//in quanto non riesco a raggiungere tutte le variabili.
+
+		//marco tutti gli archi in G_m che non sono in M come NON USATI
+		//calcono la SCC (componenti fortemente connesse) in G_m e marco tutti gli archi in SCC come USATI
+		//uso la ricerca in ampiezza per G_m iniziando dai veritici M-free (nodi isolati fuori da M) e marco gli archi attraversati come USATI
+
+		//ciclo su tutti gli archi (x,d) non usati in G_m, e agisco sui domini togliendo "d" dal dominio di x.
+		//se qualche dominio diventa vuoto ritorno false altrimenti ho ottenuto la consistenza sugli iperarchi del vincolo
+
+		return true;
+	}	
 	
 	
 	public String toString() {
