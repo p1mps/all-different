@@ -144,7 +144,7 @@ public class CSP {
 			CSP copy = new CSP(this);
 			cronometro.avanza();
 			finishedTimes.add(cronometro.leggi());
-			System.out.println("prima " +this);
+			//System.out.println("prima " +this);
 			this.backtracking(0, false, copy);
 			System.out.println("dopo " +this);
 			long lettura = cronometro.leggi();
@@ -306,10 +306,10 @@ public class CSP {
 
 			for (int d = 0; d < constraint.getVariables().get(j).getDomain().getValues().size() && j < constraint.getVariables().size() && !success; d++) {
 
-				System.out.println("variabile "+  j+ " vale " +constraint.getVariables().get(j).getDomain().getValues().get(d));
+				//System.out.println("variabile "+  j+ " vale " +constraint.getVariables().get(j).getDomain().getValues().get(d));
 				//se sono all'inizio devo salvarmi i domini
 				
-				if(j == constraint.getVariables().size() -1 && consistentArcConsistency()){
+				if(j == constraint.getVariables().size() -1 && consistentArcConsistency() && consistent()){
 					System.out.println("ho finito!");
 					this.consistent = true;
 					success = true;
@@ -317,7 +317,7 @@ public class CSP {
 				}
 				else{
 					//xj = {d}
-					if(constraint.getVariables().get(j).getDomain().getValues().size() > 0){
+					if(constraint.getVariables().get(j).getDomain().getValues().size() > d){
 					Domain newDomain = new Domain();
 					Vector<Integer> values = new Vector<Integer>();
 					
@@ -327,9 +327,11 @@ public class CSP {
 					//System.out.println("copia csp2" + copy);
 					}
 					if(consistentArcConsistency() && consistent()){
-						System.out.println("backtracking\n"+this);
+						//System.out.println("backtracking\n"+this);
+						success = false;
 						
 						backtracking(j+1, success,copy);
+						
 						//System.out.println("consistente");
 					}
 					else{
@@ -337,7 +339,7 @@ public class CSP {
 						//DEVO COPIARE DA J AL SIZE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 						this.setConstraint(new ConstraintAllDifferent(copy.getConstraint()));
 						this.constraint.getVariables().get(j).getDomain().removeValue(d);
-						
+						this.consistent = false;
 						copy = new CSP(this);
 						//copy = new CSP(this);
 						//						System.out.println("copia csp" + copy);
@@ -500,16 +502,16 @@ public class CSP {
 		//		System.out.println(success);
 //		c.createFiles();
 //		
-		for (int i = 3; i < 5; i++) {
+		for (int i = 4; i < 10; i++) {
 			c.generateRandom(i);	
 		}
-		c.setConstraint(constraint);
-		CSP copy = new CSP(c);
-		System.out.println(c);
-		boolean success = false;
-		c.backtracking(0, success, copy);
-		System.out.println(c);
-		System.out.println(success);
+//		c.setConstraint(constraint);
+//		CSP copy = new CSP(c);
+//		System.out.println(c);
+//		boolean success = false;
+//		c.backtracking(0, success, copy);
+//		System.out.println(c);
+//		System.out.println(success);
 	}
 
 
