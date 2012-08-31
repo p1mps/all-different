@@ -1,12 +1,13 @@
 package org.alldifferent;
 
-import java.util.Collections;
 import java.util.Vector;
+
+
 
 public class ConstraintAllDifferent {
 	
 	private Vector<Variable> variables = new Vector<Variable>();
-
+		
 	public void addVariable(Variable v){
 		variables.add(v);
 	}

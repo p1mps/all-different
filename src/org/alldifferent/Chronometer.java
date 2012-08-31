@@ -17,16 +17,16 @@ package org.alldifferent;
  * @author    <em>Marco Cimatti</em>
  * @version   1.0
  */
-public class Cronometro {
+public class Chronometer {
 
   /** Accumulatore contenente il numero dei millisecondi trascorsi. */
-  private long contatore;
+  private long counter;
 
   /** Istante temporale dell'ultimo avvio del cronometro. */
-  private long avviato_a;
+  private long started;
 
   /** Variabile di stato che indica se il cronometro sta avanzando oppure no. */
-  private boolean avanzando;
+  private boolean on;
 
 
   /**
@@ -38,13 +38,13 @@ public class Cronometro {
    * @see   #avanza()
    * @see   #avanzaDaCapo()
    */
-  public Cronometro() { azzera(); }
+  public Chronometer() { clean(); }
 
   /** Metodo per (fermare ed) azzerare del cronometro. */
-  public void azzera() {
+  public void clean() {
     synchronized (this) {
-      contatore = 0;
-      avanzando = false;
+      counter = 0;
+      on = false;
     }
   }
 
@@ -57,10 +57,10 @@ public class Cronometro {
    *
    * @see   #ferma()
    */
-  public void avanza() {
+  public void start() {
     synchronized (this) {
-      avviato_a = System.currentTimeMillis();
-      avanzando = true;
+      started = System.currentTimeMillis();
+      on = true;
     }
   }
 
@@ -73,17 +73,17 @@ public class Cronometro {
    * @see   #avanza()
    * @see   #avanzaDaCapo()
    */
-  public void ferma() {
+  public void stop() {
     synchronized (this) {
-      contatore += System.currentTimeMillis() - avviato_a;
-      avanzando = false;
+      counter += System.currentTimeMillis() - started;
+      on = false;
     }
   }
 
   /** Azzera il cronometro e ne fa partire il conteggio. */
   public void avanzaDaCapo() {
-    azzera();
-    avanza();
+	clean();
+    start();
   }
 
   /**
@@ -93,10 +93,10 @@ public class Cronometro {
    *
    * @return   il numero totale di millisecondi contati dall'istanza.
    */
-  public long leggi() {
+  public long read() {
     synchronized (this) {
-      return avanzando ? contatore + System.currentTimeMillis() - avviato_a
-                       : contatore;
+      return on ? counter + System.currentTimeMillis() - started
+                       : counter;
     }
   }
 
@@ -109,6 +109,6 @@ public class Cronometro {
    * @see      #leggi()
    */
   public String toString() {
-    return "" + leggi();
+    return "" + read();
   }
 }

@@ -12,9 +12,16 @@ xi had its initial domain set to [a, b], where a and b, a ≤ b, were chosen uni
 
 
 TODO:
+	togliere commenti
 	per backtracking usare la value delle variabili
 	mettere Vector<Integer> sarebbe bello
 	rimplementare generazione random
 	implementrare backtracking	(è backtracking-free?)->NO!
     finire i primi 3 algoritmi
 	leggere teoria grafi
+	
+	
+	salvare file di log in base all'enum
+	
+	
+	
