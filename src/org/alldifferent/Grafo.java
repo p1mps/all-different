@@ -179,8 +179,8 @@ public class Grafo {
 				//se il vertex ha come adiacenze una variabile, non posso inserirne un'altra
 				//questo perchè ogni arco collega una variabile ad un valore solo nel suo dominio
 				if(!contains(verAdj, tmp) && i != vars.size()) {
-					
 					replaceVertex(vertex, vars.get(i));
+					//aggiorno tmp con la variabile appena inserita
 					tmp = vars.get(i);
 					i++;
 				}
