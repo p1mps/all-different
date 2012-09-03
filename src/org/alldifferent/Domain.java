@@ -2,13 +2,12 @@ package org.alldifferent;
 
 import java.util.Vector;
 
-import com.rachum.amir.util.range.Range;
 
 public class Domain {
 
 	private Vector<Integer> values = new Vector<Integer>(); 
 	//private Range range = new Range();
-	private Vector<Range> intervals = new Vector<Range>();
+	private Range interval;
 	
 	public Domain(){
 
@@ -21,6 +20,7 @@ public class Domain {
 			values.add(new Integer(d.getValues().get(i)));
 		}
 
+		this.interval = new Range(d.getMin(),d.getMax());
 
 
 	}
@@ -41,6 +41,40 @@ public class Domain {
 	}
 
 
+	public void removeValues(Vector<Integer> v){
+	
+		
+		for(int i=0; i<v.size();i++)
+			if(this.values.contains(v.get(i)))
+				this.values.remove(v.get(i));
+		
+	}
+	//ritorna l'insieme degli interi dell'intersezione i 2 domini
+	public Vector<Integer> intersectInterval(Range interval){
+	
+		Vector<Integer> v = new Vector<Integer>();
+		if(this.getValues().contains(interval.getStart()))
+			v.add(interval.getStart());
+		if(this.getValues().contains(interval.getEnd()))
+			v.add(interval.getEnd());
+	
+		return v;
+	
+	}
+	
+//		if(this.interval.getStart() > d.interval.getStart()
+//				&& this.interval.getEnd() < d.interval.getEnd() 
+//			|| 
+//			this.interval.getStart() < d.interval.getStart()
+//			&& this.interval.getEnd() > d.interval.getEnd()) 
+//		
+//			return true;
+//			
+//		return false;
+	
+
+	
+	
 	//ritorna true se l'intersezione è non vuota
 	public boolean intersect(Domain d){
 
@@ -61,8 +95,9 @@ public class Domain {
 				//System.out.println(d.getValues().get(i));
 				values.remove(d.getValues().get(i));
 			}
-		}	
-
+		}
+		
+		buildInterval();
 
 	}
 
@@ -73,13 +108,79 @@ public class Domain {
 
 	}
 
+	
+	public Integer getMax() {
+		
+		if(!values.isEmpty()){
+			Integer max = values.get(0);
 
+			for (int i = 1; i < values.size(); i++) {
+				if(values.get(i) >= max)
+					max = values.get(i);
+			}
+			return max;
+		}
+		else
+			return null;
+	}
+	
+	public Integer getMin() {
+		
+		if(!values.isEmpty()){
+		Integer min = values.get(0);
+		
+		for (int i = 1; i < values.size(); i++) {
+				if(values.get(i) < min)
+				min = values.get(i);
+		}
+		return min;
+		}
+		else
+			return null;
+	}
+	
+	
+
+	public void buildInterval() {
+		System.out.println("min:" + getMin());
+		System.out.println("max:" + getMax());
+		this.interval = new Range(getMin(),getMax());
+		System.out.println("creato range "+interval);
+	
+	}
+		
+		
+	
+	
+	
+	public String toString() {
+		
+		String s = "";
+		s = s + values +"\n"; 
+		if(interval != null)
+			s = s + "interval:" + interval;
+		
+		return s;
+		
+	}
+	
+	
 	public Vector<Integer> getValues() {
 		return values;
 	}
 
 	public void setValues(Vector<Integer> values) {
 		this.values = values;
+	}
+
+
+	public Range getInterval() {
+		return interval;
+	}
+
+
+	public void setInterval(Range interval) {
+		this.interval = interval;
 	}
 
 

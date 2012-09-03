@@ -14,14 +14,21 @@ import java.util.Vector;
 
 
 
-public class CSP {
+public  class CSP {
 
 
 	static private Algo algo;
 	
 	private ConstraintAllDifferent constraint;
+	
 	//tempi per la risoluzione dei problemi
-	private Vector<Long> finishedTimes = new Vector<Long>();
+	private Vector<Long> finishedTimesArc = new Vector<Long>();
+	private Vector<Long> finishedTimesBounds = new Vector<Long>();
+	private Vector<Long> finishedTimesRange = new Vector<Long>();
+	double averageTimeArc = 0,sumTimeArc=0;
+	double averageTimeBounds = 0,sumTimeBounds=0;
+	double averageTimeRange = 0,sumTimeRange=0;
+	
 	private boolean consistent = false;
 	//file di log
 	private FileWriter fstreamlog; 
@@ -98,15 +105,43 @@ public class CSP {
 		return t2-t1;
 	}
 
+	
 
+	public void writeTimes(int index){
+		
+		try {
+			fstreamtime = new FileWriter("arc" + " time.txt", true);
+			outlogtime = new BufferedWriter(fstreamtime);
+			outlogtime.write(index + " " + averageTimeArc);
+			//System.out.println("tempo medio "+  index + " variabili: "+averageTime);
+			outlogtime.newLine();
+			outlogtime.close();
+			fstreamtime = new FileWriter("bounds" + " time.txt", true);
+			outlogtime = new BufferedWriter(fstreamtime);
+			outlogtime.write(index + " " + averageTimeBounds);
+			//System.out.println("tempo medio "+  index + " variabili: "+averageTime);
+			outlogtime.newLine();
+			outlogtime.close();
+			fstreamtime = new FileWriter("ranges" + " time.txt", true);
+			outlogtime = new BufferedWriter(fstreamtime);
+			outlogtime.write(index + " " + averageTimeRange);
+			//System.out.println("tempo medio "+  index + " variabili: "+averageTime);
+			outlogtime.newLine();
+			outlogtime.close();
 
-	//genera 100 problemi random, li risolve e scrive sul file di log i risultati
+		} catch (IOException e) {
+
+	}
+		
+	}
+	
+	
+	//genera 100 problemi random, li risolve con i 3 algoritmi e scrive sul file di log i risultati
 	//index == numero variabili	
-	public void generateRandom(int index,Algo algo){
+	public void generateRandom(int index){
 		
 
-		double averageTime = 0,sumTime=0;
-		
+		//creo 100 problemi
 		for (int k = 0; k < 100; k++) {
 
 			ConstraintAllDifferent c = new ConstraintAllDifferent();
@@ -134,6 +169,7 @@ public class CSP {
 					values.add(new Integer(j));
 
 				d.setValues(values);
+				d.buildInterval();
 				Variable v = new Variable(i,d);
 				c.addVariable(v);
 
@@ -143,35 +179,61 @@ public class CSP {
 			
 			this.constraint = c;
 			
+			//lo risolvo con tutti e 3 gli algoritmi e me lo salvo:
+			int i = 0;
 			CSP copy = new CSP(this);
-			chronometer.start();
-			finishedTimes.add(chronometer.read());
-			this.backtracking(0, false, copy);
-			System.out.println("dopo " +this);
-			long lettura = chronometer.read();
-			finishedTimes.add(lettura);
-			
-			System.out.println("ci ho messo "+lettura);
-			chronometer.clean();
-			
-			this.dumpTimes("tempo "+lettura);
-			sumTime = sumTime + lettura;
-
+			long lettura = 0;
+			while(i < 3){
+				
+				switch(i){
+				
+					case 0:
+						CSP.algo = Algo.arc;
+						chronometer.start();
+						finishedTimesArc.add(chronometer.read());
+						this.backtracking(0, false, copy);
+						System.out.println("dopo " +this);
+						lettura = chronometer.read();
+						finishedTimesArc.add(lettura);
+						System.out.println("ci ho messo "+lettura);
+						chronometer.clean();
+						this.dumpTimes("tempo "+lettura);
+						sumTimeArc = sumTimeArc + lettura;
+					break;
+					
+					
+					case 1:
+						CSP.algo = Algo.bounds;
+						chronometer.start();
+						finishedTimesBounds.add(chronometer.read());
+						this.backtracking(0, false, copy);
+						System.out.println("dopo " +this);
+						lettura = chronometer.read();
+						finishedTimesBounds.add(lettura);
+						System.out.println("ci ho messo "+lettura);
+						chronometer.clean();
+						this.dumpTimes("tempo "+lettura);
+						sumTimeBounds = sumTimeBounds + lettura;
+						break;
+					
+					
+					case 3:
+						CSP.algo = Algo.range;
+						break;
+				
+				
+				}
+				
+				i++;
+				
+			}
 		}
 
-		averageTime = sumTime/100.0;
+		averageTimeArc = sumTimeArc/100.0;
+		averageTimeBounds = sumTimeBounds/100.0;
+		averageTimeRange = sumTimeRange/100.0;
 		
-		try {
-			fstreamtime = new FileWriter(CSP.algo + " time.txt", true);
-			outlogtime = new BufferedWriter(fstreamtime);
-			outlogtime.write(index + " " + averageTime);
-			System.out.println("tempo medio "+  index + " variabili: "+averageTime);
-			outlogtime.newLine();
-			outlogtime.close();
-			
-		} catch (IOException e) {
-
-	}
+		this.writeTimes(index);
 
 
 	}
@@ -258,10 +320,34 @@ public class CSP {
 
 	public boolean consistentBound(){
 		
+		boolean foundHall = false;
 		
-		return false;
+		for (int i = 0; i < this.constraint.getVariables().size(); i++) {
+			
+			if(!this.constraint.getVariables().get(i).getDomain().isEmpty()){
+				Range r = new Range(this.constraint.getVariables().get(i).getDomain().getInterval().getStart(),this.constraint.getVariables().get(i).getDomain().getInterval().getEnd());
+				Vector<Variable> v  = this.constraint.countVariables(r);
+				
+				//è un intervallo di Hall facciamo l'intersezione tra I e K_I e,se non vuota,
+				//rimuoviamo i valori dal dominio della variabile per tutte le varibili che non ci sono in k
+				if(this.constraint.isHall(r, v.size()) && !v.contains(this.constraint.getVariables().get(i))){
+					
+					Vector<Integer> valuesIntersected = this.constraint.getVariables().get(i).getDomain().intersectInterval(r);
+					
+					if(!valuesIntersected.isEmpty()){
+						foundHall = true;
+						this.constraint.getVariables().get(i).getDomain().removeValues(valuesIntersected);
+						this.constraint.getVariables().get(i).getDomain().buildInterval();
+					}
+					
+				}
+				}
+			}
+		
+		return foundHall;
 		
 	}
+	
 	
 	
 	//j indice variabile success booleano per la ricorsione
@@ -289,6 +375,7 @@ public class CSP {
 						values.add(constraint.getVariables().get(j).getDomain().getValues().get(d));
 						newDomain.setValues(values);
 						constraint.getVariables().get(j).setDomain(newDomain);
+						this.constraint.getVariables().get(j).getDomain().buildInterval();
 					}
 
 					//forse consistent non serve mica :\
@@ -302,8 +389,10 @@ public class CSP {
 						else{
 							this.setConstraint(new ConstraintAllDifferent(copy.getConstraint()));
 							this.constraint.getVariables().get(j).getDomain().removeValue(d);
+							this.constraint.getVariables().get(j).getDomain().buildInterval();
 							this.consistent = false;
 							copy = new CSP(this);
+							
 						}
 
 						break;
@@ -318,6 +407,7 @@ public class CSP {
 						else{
 							this.setConstraint(new ConstraintAllDifferent(copy.getConstraint()));
 							this.constraint.getVariables().get(j).getDomain().removeValue(d);
+							this.constraint.getVariables().get(j).getDomain().buildInterval();
 							this.consistent = false;
 							copy = new CSP(this);
 						}
@@ -348,7 +438,7 @@ public class CSP {
 	}
 
 	public static void main(String[] args) {
-		CSP c = new CSP();
+//		CSP c = new CSP();
 //
 //		ConstraintAllDifferent constraint = new ConstraintAllDifferent();
 //		Vector<Integer> valuesX1 = new Vector<Integer>();
@@ -396,18 +486,20 @@ public class CSP {
 		//		System.out.println(success);
 //		c.createFiles();
 //		
-		CSP.algo = Algo.arc;
+//		CSP.algo = Algo.arc;
 		
+		//DEVO GENERARLI TUTTI UGUALI E RISOLVERLI CON ALTRI ALGORITMIIIIIIIIIIIIIII
+		CSP c = new CSP();
 		for (int i = 4; i < 10; i++) {
-			c.generateRandom(i,Algo.arc);	
+			c.generateRandom(i);	
 		}
-		
-		CSP.algo = Algo.bounds;
-		
-		for (int i = 4; i < 10; i++) {
-			c.generateRandom(i,Algo.arc);	
-		}
-		
+//		
+//		CSP.algo = Algo.bounds;
+//		
+//		for (int i = 4; i < 10; i++) {
+//			c.generateRandom(i,Algo.arc);	
+//		}
+//		
 		
 //		c.setConstraint(constraint);
 //		CSP copy = new CSP(c);
@@ -416,6 +508,12 @@ public class CSP {
 //		c.backtracking(0, success, copy);
 //		System.out.println(c);
 //		System.out.println(success);
+	
+
+	
+	
+	
+	
 	}
 
 

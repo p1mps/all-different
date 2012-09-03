@@ -39,21 +39,8 @@ public class Variable {
 		
 		String s = "";
 		s = s + "x" + id + " ";
-		//s = s + "variable x" + id + " ";
-		/*s = s + "domain: {";
-		
-		for(int i = 0; i < domain.getSize(); i++){
-			s = s + domain.getValues().get(i);
-			if(i != domain.getSize() - 1)
-				s = s + ",";
-		}
-		
-		s = s + "}";*/
-		
-		if(value.equals(new Integer(-1)) == false){
-			s = s + "\n";
-			s = s + "final value:" + value;
-		}
+		s = s + "variable x" + id + " ";
+		s = s + this.domain;
 		
 		return s;
 	}
