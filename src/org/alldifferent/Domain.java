@@ -26,19 +26,25 @@ public class Domain {
 	}
 
 
+
+public class Domain {
+
+	private Vector<Integer> values = new Vector<Integer>(); 
+	
 	public boolean isEmpty(){
 		return values.isEmpty();
 	}
-
+	
 	public void instantiate(Vector<Integer> v){
 
 		values = v;
 
 	}
-
+	
 	public int getSize(){
 		return values.size();
 	}
+
 
 
 	public void removeValues(Vector<Integer> v){
@@ -71,41 +77,43 @@ public class Domain {
 //			return true;
 //			
 //		return false;
-	
 
-	
 	
 	//ritorna true se l'intersezione è non vuota
 	public boolean intersect(Domain d){
-
+		
+		
 		for(int i = 0; i < d.getSize(); i++){
 			if(this.getValues().contains(d.getValues().get(i)) == true){
 				return true;
 			}
+					
 		}
-
+		
 		return false;
 	}
 
-	//toglie da this tutti i valori che ci sono sia in d che in this
+	//toglie da this tutti i valori che ci sono in d ma non in this
 	public void removeValues(Domain d){
-		//System.out.println("rimuovo valori");
+		
 		for(int i = 0; i < d.getSize(); i++){
-			if(this.getValues().contains(d.getValues().get(i)) == true){
-				//System.out.println(d.getValues().get(i));
+			if(this.getValues().contains(d.getValues().get(i)) == true)
 				values.remove(d.getValues().get(i));
+
 			}
 		}
 		
 		buildInterval();
 
-	}
-
-
-
+	
+		}	
+}
+	
+	
+	
 	public void removeValue(int i) {
 		values.remove(i);
-
+		
 	}
 
 	
@@ -164,7 +172,6 @@ public class Domain {
 		
 	}
 	
-	
 	public Vector<Integer> getValues() {
 		return values;
 	}
@@ -172,6 +179,7 @@ public class Domain {
 	public void setValues(Vector<Integer> values) {
 		this.values = values;
 	}
+
 
 
 	public Range getInterval() {
@@ -182,7 +190,6 @@ public class Domain {
 	public void setInterval(Range interval) {
 		this.interval = interval;
 	}
-
 
 
 }

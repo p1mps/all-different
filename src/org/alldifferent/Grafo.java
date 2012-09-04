@@ -14,6 +14,7 @@ import java.util.Vector;
 
 import org.jgrapht.Graph;
 import org.jgrapht.VertexFactory;
+import org.jgrapht.alg.NeighborIndex;
 import org.jgrapht.generate.CompleteBipartiteGraphGenerator;
 import org.jgrapht.graph.ClassBasedVertexFactory;
 import org.jgrapht.graph.DefaultEdge;
@@ -29,7 +30,7 @@ import org.jgrapht.traverse.DepthFirstIterator;
  */
 public class Grafo {
 	
-	private Graph<Object, DefaultEdge> completeGraph; 
+	private Graph<Object, DefaultEdge> completeGraph;
 	private Vector<Variable> vars;
 	/**
 	 * @param args
@@ -39,7 +40,9 @@ public class Grafo {
 		
 		int nValuesVars = 3;
 		int nValuesDms = 4;
+		Vector<Variable> vars = new Vector<Variable>();
 		
+		/*
 		//Definisco i valori dei domini
 		Vector<Integer> valuesX1 = new Vector<Integer>();
 		Vector<Integer> valuesX2 = new Vector<Integer>();
@@ -63,12 +66,19 @@ public class Grafo {
 		dX1.setValues(valuesX1);
 		dX2.setValues(valuesX2);
 		dX3.setValues(valuesX3);
-
+		
 		//definisco le variabili
-		Vector<Variable> vars = new Vector<Variable>();
+		
 		vars.add(0, new Variable(1,dX1));
 		vars.add(1, new Variable(2,dX2));
 		vars.add(2, new Variable(3,dX3));
+		*/
+		int domCard = 4;
+		CSP c = new CSP();
+		c.generateRandom(domCard);
+		vars = c.getConstraint().getVariables();
+		nValuesVars = vars.size();
+		nValuesDms = domCard;
 		
 		Grafo g = new Grafo();
 		g.createBipartiteGraph(nValuesVars, nValuesDms, vars);
@@ -114,6 +124,21 @@ public class Grafo {
         return true;
     }
 	
+	//ritorna true se verAdj contiene tmp
+	private boolean contains(Set<Object> verAdj, Object tmp) {
+		
+		Iterator<Object> it = verAdj.iterator();
+		
+		while(it.hasNext()) {
+			
+			if(it.next().getClass() == tmp.getClass())
+				return true;
+		}
+		
+		return false;
+		
+	}
+	
 	//questo metodo crea un grafo bipartito con variabili e valori dei domini
 	public void createBipartiteGraph(int nValuesVars, int nValuesDms, Vector<Variable> variables) {
 		vars = variables;
@@ -126,7 +151,7 @@ public class Grafo {
 
 		//uso il generatore per creare il grafo bipartito
 		bip.generateGraph(completeGraph, v, null);
-
+	
 		//uso un iteratore per scorrere l'albero in ampiezza
 		//BreadthFirstIterator<Object, DefaultEdge> it = new BreadthFirstIterator<Object, DefaultEdge>(completeGraph);
 
@@ -135,22 +160,43 @@ public class Grafo {
 		vertices.addAll(completeGraph.vertexSet());
 		Integer counter = 0;
 		int i = 0;
+		Object tmp = new Object();
 		//ciclo su tutti i vertici per rimpiazzare i vecchi vertici con i nuovi
 		for (Object vertex : vertices) {
-			//devo castare a Object per vincolo sul tipo
-			if(completeGraph.edgesOf(vertex).size() == nValuesDms && i != nValuesDms) {
+			
+			if(i == 0) {
 				replaceVertex(vertex, vars.get(i));
+				tmp = vars.get(i);
 				i++;
+				
 			}
 			else {
-				replaceVertex(vertex, (Object) counter++);
+				//prendo i vertici adiacenti a vertex
+				Set<Object> verAdj = new HashSet<Object>();
+				NeighborIndex<Object, DefaultEdge> adj = new NeighborIndex<Object, DefaultEdge>(completeGraph);
+				verAdj.addAll(adj.neighborsOf(vertex));
+				
+				//se il vertex ha come adiacenze una variabile, non posso inserirne un'altra
+				//questo perchè ogni arco collega una variabile ad un valore solo nel suo dominio
+				if(!contains(verAdj, tmp) && i != vars.size()) {
+					replaceVertex(vertex, vars.get(i));
+					//aggiorno tmp con la variabile appena inserita
+					tmp = vars.get(i);
+					i++;
+				}
+				else {
+					replaceVertex(vertex, (Object) counter++);
+				}
+				
 			}
+			
+			
 		}
 		
 		//Sistemo il grafo con i domini delle variabili
 		Set<DefaultEdge> temp = new HashSet<DefaultEdge>();
 		Set<DefaultEdge> allEdge = completeGraph.edgeSet();
-		
+		/*
 		//ciclo su ogni arco e controllo se il valore target è contenuto nel dominio della variabile
 		//altrimenti rimuovo l'arco dal grafo
 		for(DefaultEdge e : allEdge) {
@@ -165,7 +211,7 @@ public class Grafo {
 		}
 		
 		completeGraph.removeAllEdges(temp);
-
+		*/
 		printGraph();
 
 		System.out.println(completeGraph.toString());		
@@ -184,11 +230,13 @@ public class Grafo {
 		}
 	
 	}
-	/*
 	
+	/*
 	public Grafo computeMaximumMatching() {
 		
 	}
+	
+	
 	public Grafo computeSCCs() {
 		
 	}

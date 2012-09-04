@@ -9,13 +9,7 @@ public class Variable {
 		this.domain = domain;
 	}
 
-	public Variable(Variable v){
-		this.id = v.getId();
-		this.domain = new Domain(v.getDomain());
-		
-	}
-	
-	
+
 	public Variable() {
 		super();
 	}
@@ -65,7 +59,7 @@ public class Variable {
 	public Integer getValue() {
 		return value;
 	}
-	
+
 	//settare dominio a 0!
 	public void setValue(Integer value) {
 		this.value = value;

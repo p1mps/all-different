@@ -2,15 +2,14 @@ package org.alldifferent;
 
 import java.util.Vector;
 
-
-
 public class ConstraintAllDifferent {
 	
 	private Vector<Variable> variables = new Vector<Variable>();
-		
+
 	public void addVariable(Variable v){
 		variables.add(v);
 	}
+
 
 	public ConstraintAllDifferent(ConstraintAllDifferent c){
 		for (int i = 0; i < c.getVariables().size(); i++) {
@@ -47,6 +46,7 @@ public class ConstraintAllDifferent {
 		// TODO Auto-generated constructor stub
 	}
 
+
 	@Override
 	public String toString() {
 		
@@ -70,10 +70,6 @@ public class ConstraintAllDifferent {
 
 	public Vector<Variable> getVariables() {
 		return variables;
-	}
-
-	public void setVariables(Vector<Variable> variables) {
-		this.variables = variables;
 	}
 	
 	
