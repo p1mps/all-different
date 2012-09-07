@@ -10,7 +10,6 @@ public class ConstraintAllDifferent {
 		variables.add(v);
 	}
 
-
 	public ConstraintAllDifferent(ConstraintAllDifferent c){
 		for (int i = 0; i < c.getVariables().size(); i++) {
 			variables.add(new Variable(c.getVariables().get(i)));
@@ -18,23 +17,11 @@ public class ConstraintAllDifferent {
 		}
 		
 	}
-	
-	//nel range r compare v
-	public boolean rangeContainsVariable(Range r,Variable v){
-		
-		
-		
-		return false;
-		
-			
-	}
-	
+
 	
 	//k è |K|
 	public boolean isHall(Range r,int k){
-		
-		//System.out.println("size range " + r.size());
-		
+
 		if(r.size() == k)
 			return true;
 		
@@ -47,7 +34,7 @@ public class ConstraintAllDifferent {
 	public Vector<Variable> countVariables(Range range){
 		
 		Vector<Variable> v = new Vector<Variable>();
-//		System.out.println("in "+range);
+
 		for (int i = 0; i < this.variables.size() &&  !variables.get(i).getDomain().isEmpty(); i++) {
 			
 			if( variables.get(i).getDomain().getInterval().getStart() == range.getStart() && variables.get(i).getDomain().getInterval().getEnd() == range.getEnd()){
@@ -91,7 +78,5 @@ public class ConstraintAllDifferent {
 	public Vector<Variable> getVariables() {
 		return variables;
 	}
-	
-	
 	
 }

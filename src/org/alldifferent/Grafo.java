@@ -75,7 +75,7 @@ public class Grafo {
 		*/
 		int domCard = 4;
 		CSP c = new CSP();
-		c.generateRandom(domCard);
+		c.generateRandom(domCard,"bipartite");
 		vars = c.getConstraint().getVariables();
 		nValuesVars = vars.size();
 		nValuesDms = domCard;
@@ -177,7 +177,7 @@ public class Grafo {
 				verAdj.addAll(adj.neighborsOf(vertex));
 				
 				//se il vertex ha come adiacenze una variabile, non posso inserirne un'altra
-				//questo perchè ogni arco collega una variabile ad un valore solo nel suo dominio
+				//questo perchÔøΩ ogni arco collega una variabile ad un valore solo nel suo dominio
 				if(!contains(verAdj, tmp) && i != vars.size()) {
 					replaceVertex(vertex, vars.get(i));
 					//aggiorno tmp con la variabile appena inserita
@@ -197,7 +197,7 @@ public class Grafo {
 		Set<DefaultEdge> temp = new HashSet<DefaultEdge>();
 		Set<DefaultEdge> allEdge = completeGraph.edgeSet();
 		/*
-		//ciclo su ogni arco e controllo se il valore target è contenuto nel dominio della variabile
+		//ciclo su ogni arco e controllo se il valore target ÔøΩ contenuto nel dominio della variabile
 		//altrimenti rimuovo l'arco dal grafo
 		for(DefaultEdge e : allEdge) {
 			Variable source = (Variable) completeGraph.getEdgeSource(e);

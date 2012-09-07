@@ -27,3 +27,5 @@ TODO:
 	sortVariables()
 	plot.sh
 	sistemare consistentBound
+	
+	cancellare finishedTimes
