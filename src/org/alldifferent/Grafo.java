@@ -73,7 +73,7 @@ public class Grafo {
 		*/
 		int domCard = 3;
 		CSP c = new CSP();
-		c.generateRandom(domCard);
+		c.generateRandom(domCard,"bipartite");
 		vars = c.getConstraint().getVariables();
 		nValuesVars = vars.size();
 		nValuesDms = domCard;
