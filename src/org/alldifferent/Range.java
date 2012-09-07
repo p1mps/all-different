@@ -29,7 +29,7 @@ public class Range  {
 	
 	public int size(){
 		
-		return end-start;
+		return end-start + 1;
 	}
 
 	public Integer getStart() {

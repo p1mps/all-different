@@ -14,7 +14,11 @@ public class Variable {
 		super();
 	}
 
-
+	public Variable(Variable v){
+		this.id = v.getId();
+		this.domain = new Domain(v.getDomain());
+		
+	}
 	private int id;
 	private Domain domain;
 	//forse inutile

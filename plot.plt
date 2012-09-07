@@ -6,5 +6,5 @@ set ylabel "Tempo (ms)"
 set grid
 set key left top
 #set key at 0,0 
-plot "./arc time.txt" with line ls 1 title "arcConsistency","./bounds time.txt" title "boundsConsistency" with line ls 2
+plot "./arc time.txt" with line ls 1 title "arcConsistency","./bounds time.txt" title "boundsConsistency" with line ls 2,"./ranges time.txt" title "boundsConsistency" with line ls 3
 #plot "./range time.txt" with line ls 3

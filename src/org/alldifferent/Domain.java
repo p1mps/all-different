@@ -26,10 +26,6 @@ public class Domain {
 	}
 
 
-
-public class Domain {
-
-	private Vector<Integer> values = new Vector<Integer>(); 
 	
 	public boolean isEmpty(){
 		return values.isEmpty();
@@ -101,15 +97,10 @@ public class Domain {
 				values.remove(d.getValues().get(i));
 
 			}
+		buildInterval();
 		}
 		
-		buildInterval();
-
-	
-		}	
-}
-	
-	
+		
 	
 	public void removeValue(int i) {
 		values.remove(i);
@@ -150,10 +141,12 @@ public class Domain {
 	
 
 	public void buildInterval() {
-		System.out.println("min:" + getMin());
-		System.out.println("max:" + getMax());
+		
+//		System.out.println("min:" + getMin());
+//		System.out.println("max:" + getMax());
 		this.interval = new Range(getMin(),getMax());
-		System.out.println("creato range "+interval);
+//		System.out.println("domain" + this.interval);
+		//System.out.println("creato range "+interval);
 	
 	}
 		
@@ -164,10 +157,10 @@ public class Domain {
 	public String toString() {
 		
 		String s = "";
-		s = s + values +"\n"; 
-		if(interval != null)
-			s = s + "interval:" + interval;
-		
+		s = s + values + "\n"; 
+//		if(interval != null)
+//			s = s + interval + "\n";
+//		
 		return s;
 		
 	}
