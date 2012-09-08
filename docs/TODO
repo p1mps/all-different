@@ -23,5 +23,9 @@ TODO:
 	
 	salvare file di log in base all'enum
 	
+	removeValuesInterval()
+	sortVariables()
+	plot.sh
+	sistemare consistentBound
 	
-	
+	cancellare finishedTimes
