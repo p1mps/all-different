@@ -160,7 +160,7 @@ public  class CSP {
 			
 			CSP copy = new CSP(this);
 			long lettura = 0;
-
+			/*
 			chronometer.start();
 			finishedTimes.add(chronometer.read());
 			this.backtracking(0, false, copy);
@@ -169,6 +169,7 @@ public  class CSP {
 			chronometer.clean();
 			this.dumpTimes("tempo "+lettura);
 			sumTime = sumTime + lettura;
+			*/
 		}
 		
 		averageTime = sumTime/100.0;

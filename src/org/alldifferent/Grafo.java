@@ -4,18 +4,26 @@
 package org.alldifferent;
 
 
+import java.awt.List;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.VertexFactory;
+import org.jgrapht.alg.EdmondsKarpMaximumFlow;
 import org.jgrapht.alg.NeighborIndex;
+import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.generate.CompleteBipartiteGraphGenerator;
 import org.jgrapht.graph.ClassBasedVertexFactory;
 import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DirectedSubgraph;
+import org.jgrapht.graph.DirectedWeightedSubgraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
+import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 /**
@@ -24,12 +32,18 @@ import org.jgrapht.traverse.DepthFirstIterator;
  */
 public class Grafo {
 	
-	private Graph<Object, DefaultEdge> completeGraph;
-	
-	private Vector<Variable> vars;
-	private Set<DefaultEdge> visitedEdge;
+	private Graph<Object, DefaultEdge> completeGraph = null;
+	private Graph<Object, DefaultEdge> GM_Graph = null;
+	private Graph<Object, DefaultEdge> SCC_Graph = null;
+	private Map<DefaultEdge,Double> M = null;
+	private Set<Object> M_Vertex = null;
+ 	
+	private Vector<Variable> vars = null;
+	private Set<DefaultEdge> visitedEdge = null;
 	private String startMMVertex;
 	private String finishMMVertex;
+	private Set<DefaultEdge> usedArcs = null;
+	private Set<DefaultEdge> notUsedArcs = null;
 	/**
 	 * @param args
 	 */
@@ -80,6 +94,8 @@ public class Grafo {
 		
 		Grafo g = new Grafo();
 		g.createBipartiteGraph(nValuesVars, nValuesDms, vars);
+		g.computeMaximumMatching();
+		g.computeSCC();
 		
 	}
 	
@@ -201,6 +217,7 @@ public class Grafo {
 		//Sistemo il grafo con i domini delle variabili
 		Set<DefaultEdge> temp = new HashSet<DefaultEdge>();
 		Set<DefaultEdge> allEdge = completeGraph.edgeSet();
+		Set<DefaultEdge> invertArc = new HashSet<DefaultEdge>();
 		
 		//ciclo su ogni arco e controllo se il valore target ÔøΩ contenuto nel dominio della variabile
 		//altrimenti rimuovo l'arco dal grafo
@@ -227,12 +244,18 @@ public class Grafo {
 					//aggiungo l'arco nel vettore delle rimozioni
 					temp.add(e);
 				}
+				else {
+					//mi salvo l'arco che succ andrò a girare (se necessario)
+					invertArc.add(e);
+				}
 			}
 			
 		}
 		
 		completeGraph.removeAllEdges(temp);
 		//ho creato il grafo secondo i domini delle variabili
+		
+		arcSystem(invertArc);
 		
 		//mi prendo tutti i vertici del grafo
 		vertices = new HashSet<Object>();
@@ -258,6 +281,20 @@ public class Grafo {
 		System.out.println(completeGraph.toString());		
 	}
 	
+	//metodo che orienta gli archi da variabile a valore nel dominio
+	private void arcSystem(Set<DefaultEdge> invertArc) {
+		
+		for(DefaultEdge e : invertArc) {
+			Integer source = (Integer) completeGraph.getEdgeSource(e);
+			Variable target = (Variable) completeGraph.getEdgeTarget(e);
+			
+			completeGraph.addEdge(target, source);
+		}
+		
+		completeGraph.removeAllEdges(invertArc);
+	}
+
+
 	//metodo che stampa il grafo
 	public void printGraph() {
 		
@@ -273,14 +310,92 @@ public class Grafo {
 	
 	}
 	
-	/*
-	public Grafo computeMaximumMatching() {
+	
+	public void computeMaximumMatching() {
+		
+		GM_Graph = new SimpleDirectedGraph<Object, DefaultEdge>(DefaultEdge.class);
+		EdmondsKarpMaximumFlow<Object, DefaultEdge> MM = new EdmondsKarpMaximumFlow<Object, DefaultEdge>((DirectedGraph<Object, DefaultEdge>) completeGraph);
+		
+		//calcolo una rete di flusso del grafo per trovare l'abbinamento massimo
+		MM.calculateMaximumFlow(startMMVertex, finishMMVertex);
+		M = MM.getMaximumFlow();
+		System.out.println("M: " + M.toString());
+		notUsedArcs = new HashSet<DefaultEdge>();
+		
+		//Creo il grafo orientato GM dell'abbinamento massimo di G e oriento gli archi nel seguente modo
+		//archi che appartengono ad M da variabile a valore nel dominio
+		//archi che non appartengono ad M da valore nel dominio a variabile
+		Set<DefaultEdge> arcs = M.keySet();
+		for(DefaultEdge a : arcs) {
+			
+			Object v = completeGraph.getEdgeSource(a);
+			Object d = completeGraph.getEdgeTarget(a);
+			
+			
+			//escludo i vertici sorgente e destinazione
+			if(v.getClass() == Variable.class && d.getClass() == Integer.class) {
+				
+				//aggiungo i 2 vertici
+				GM_Graph.addVertex(v);
+				GM_Graph.addVertex(d);
+				
+				//oriento l'arco nel modo opportuno
+				if(M.get(a) != 0) {
+					//System.out.println("Arco: " + a.toString());
+					GM_Graph.addEdge(v, d);
+				}
+				else {
+					GM_Graph.addEdge(d, v);
+
+					//marco gli archi che sono in GM ma non in M come non usati
+					notUsedArcs.add(GM_Graph.getEdge(d, v));
+				}
+			}
+	
+		}
+		
+		//identifico i vertici M-free
+		//prendo i vertici in G ed in GM
+		Set<Object> verticesG = completeGraph.vertexSet();
+		Set<Object> verticesGM = GM_Graph.vertexSet();
+		M_Vertex = new HashSet<Object>();
+		
+		//ciclo su ogni vertice in G e verifico che non sia contenuto in GM: in quel caso è un vertice M-free
+		for(Object v : verticesG) {
+			if(!verticesGM.contains(v)) {
+				M_Vertex.add(v);
+			}
+		}
+		
+		System.out.println("GM: " + GM_Graph.toString());
+		System.out.println("M-free: " + M_Vertex.toString());
 		
 	}
 	
 	
-	public Grafo computeSCCs() {
+	public void computeSCC() {
 		
+		StrongConnectivityInspector<Object, DefaultEdge> SCC = new StrongConnectivityInspector<Object, DefaultEdge>((DirectedGraph) GM_Graph);
+		usedArcs = new HashSet<DefaultEdge>();
+		java.util.List<DirectedSubgraph<Object, DefaultEdge>> g = SCC.stronglyConnectedSubgraphs();
+		
+		System.out.println("Numero componenti: " + g.size());
+		BreadthFirstIterator<Object, DefaultEdge> it = null;
+		
+		for(DirectedGraph<Object, DefaultEdge> c : g) {
+			//guardo se la prime componente contiene più di un vertice
+			if(c.vertexSet().size() != 1) {
+				//prendo tutti i suoi archi e li marco come usati
+				usedArcs.addAll(c.edgeSet());
+			}
+		}
+		
+		it = new BreadthFirstIterator<Object, DefaultEdge>(GM_Graph);
+		
+		while(it.hasNext()) {
+			Object vertex = it.next();
+			
+		}
 	}
-	*/
+	
 }

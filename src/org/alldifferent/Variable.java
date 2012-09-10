@@ -37,8 +37,8 @@ public class Variable {
 		
 		String s = "";
 		s = s + "x" + id + " ";
-		s = s + "variable x" + id + " ";
-		s = s + this.domain;
+		//s = s + "variable x" + id + " ";
+		//s = s + this.domain;
 		
 		return s;
 	}

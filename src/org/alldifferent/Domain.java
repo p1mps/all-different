@@ -132,7 +132,7 @@ public class Domain {
 	public String toString() {
 
 		String s = "";
-		s = s + values + "\n"; 
+		s = s + values;// + "\n"; 
 		return s;
 
 	}
