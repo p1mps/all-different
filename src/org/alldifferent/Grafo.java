@@ -4,7 +4,7 @@
 package org.alldifferent;
 
 
-import java.awt.List;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,7 +21,6 @@ import org.jgrapht.generate.CompleteBipartiteGraphGenerator;
 import org.jgrapht.graph.ClassBasedVertexFactory;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DirectedSubgraph;
-import org.jgrapht.graph.DirectedWeightedSubgraph;
 import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
@@ -32,17 +31,25 @@ import org.jgrapht.traverse.DepthFirstIterator;
  */
 public class Grafo {
 	
+	//grafo completo bipartito
 	private Graph<Object, DefaultEdge> completeGraph = null;
+	//grafo G_m costruito orientendo gli archi secondo l'appartenenza a M (accoppiamento massimo)
 	private Graph<Object, DefaultEdge> GM_Graph = null;
-	private Graph<Object, DefaultEdge> SCC_Graph = null;
+	//Mappatura del calcolo dell'accoppiamento massimo di G
 	private Map<DefaultEdge,Double> M = null;
-	private Set<Object> M_Vertex = null;
+	//Vettore dei vertici liberi
+	private Set<Object> M_freeVertex = null;
+	//Vettore dei vertici appartenenti ad M
+	private Set<Object> Mnode = null;
  	
+	//vettore delle variabili
 	private Vector<Variable> vars = null;
-	private Set<DefaultEdge> visitedEdge = null;
+	//vertici di inizio e fine per il calcolo del flusso massimo
 	private String startMMVertex;
 	private String finishMMVertex;
+	//vettore archi usati
 	private Set<DefaultEdge> usedArcs = null;
+	//vettore archi non usati
 	private Set<DefaultEdge> notUsedArcs = null;
 	/**
 	 * @param args
@@ -50,8 +57,8 @@ public class Grafo {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		int nValuesVars = 3;
-		int nValuesDms = 4;
+		int nValuesVars;
+		int nValuesDms;
 		Vector<Variable> vars = new Vector<Variable>();
 		
 		/*
@@ -60,16 +67,15 @@ public class Grafo {
 		Vector<Integer> valuesX2 = new Vector<Integer>();
 		Vector<Integer> valuesX3 = new Vector<Integer>();
 
-		valuesX1.add(0);
 		valuesX1.add(1);
+		//valuesX1.add(1);
 		valuesX1.add(2);
-		valuesX2.add(3);
-		valuesX2.add(1);
+		//valuesX2.add(3);
 		valuesX2.add(2);
-		valuesX3.add(0);
+		valuesX2.add(0);
+		//valuesX3.add(0);
 		valuesX3.add(1);
-		valuesX3.add(2);
-		valuesX3.add(3);
+		//valuesX3.add(2);
 
 		Domain dX1 = new Domain();
 		Domain dX2 = new Domain();
@@ -92,14 +98,63 @@ public class Grafo {
 		nValuesVars = vars.size();
 		nValuesDms = domCard;
 		
+		System.out.println("Problema iniziale");
+		System.out.println(vars);
+		
+		System.out.print(vars.get(0).getDomain().getValues());
+		System.out.print(vars.get(1).getDomain().getValues());
+		System.out.println(vars.get(2).getDomain().getValues());
+		
 		Grafo g = new Grafo();
 		g.createBipartiteGraph(nValuesVars, nValuesDms, vars);
 		g.computeMaximumMatching();
 		g.computeSCC();
-		
+		if(g.hyperArcConsistency()) {
+			System.out.println("\n\nProblema consistente");
+		}
+		else {
+			System.out.println("\n\nDominio vuoto ! il problema non ha soluzione");
+		}
+		System.out.println(vars);
+		System.out.print(vars.get(0).getDomain().getValues());
+		System.out.print(vars.get(1).getDomain().getValues());
+		System.out.println(vars.get(2).getDomain().getValues());
 	}
 	
 	
+	private boolean hyperArcConsistency() {
+		
+		Object s = null;
+		Object d = null;
+		
+		System.out.println("\nArchi usati: " + usedArcs);
+		System.out.println("Archi non usati: " + notUsedArcs);
+		
+		Variable tmp;
+		for(DefaultEdge a : notUsedArcs) {
+			
+			s = GM_Graph.getEdgeSource(a);
+			d = GM_Graph.getEdgeTarget(a);
+			
+			if(s.getClass() == Variable.class) {
+				tmp = (Variable) s;
+				tmp.getDomain().removeObject(d);
+			}
+			else {
+				tmp = (Variable) d;
+				tmp.getDomain().removeObject(s);
+			}
+			
+			if(tmp.getDomain().getSize() == 0) {
+				return false;
+			}
+			
+		}
+		
+		return true;
+	}
+
+
 	//rimpiazza un vecchio vertice con uno nuovo mantenendo le connessioni
 	private boolean replaceVertex(Object oldVertex, Object newVertex)
     {
@@ -168,9 +223,6 @@ public class Grafo {
 
 		//uso il generatore per creare il grafo bipartito
 		bip.generateGraph(completeGraph, v, null);
-	
-		//uso un iteratore per scorrere l'albero in ampiezza
-		//BreadthFirstIterator<Object, DefaultEdge> it = new BreadthFirstIterator<Object, DefaultEdge>(completeGraph);
 
 		//Rimpiazzo tutti i vertici (unico modo per modificare i vertici)
 		Set<Object> vertices = new HashSet<Object>();
@@ -209,10 +261,6 @@ public class Grafo {
 			
 		}
 		//Fino a qui ho creato un grafo bipartito COMPLETO
-		
-		System.out.println(vars.get(0).getDomain().getValues());
-		System.out.println(vars.get(1).getDomain().getValues());
-		System.out.println(vars.get(2).getDomain().getValues());
 		
 		//Sistemo il grafo con i domini delle variabili
 		Set<DefaultEdge> temp = new HashSet<DefaultEdge>();
@@ -278,7 +326,7 @@ public class Grafo {
 		
 		printGraph();
 
-		System.out.println(completeGraph.toString());		
+		//System.out.println(completeGraph.toString());		
 	}
 	
 	//metodo che orienta gli archi da variabile a valore nel dominio
@@ -318,14 +366,22 @@ public class Grafo {
 		
 		//calcolo una rete di flusso del grafo per trovare l'abbinamento massimo
 		MM.calculateMaximumFlow(startMMVertex, finishMMVertex);
-		M = MM.getMaximumFlow();
-		System.out.println("M: " + M.toString());
-		notUsedArcs = new HashSet<DefaultEdge>();
+		M = new HashMap<DefaultEdge, Double>(MM.getMaximumFlow());
+		
+		
+		completeGraph.removeVertex(startMMVertex);
+		completeGraph.removeVertex(finishMMVertex);
+		
+		
+		System.out.println("\nM: " + M.toString());
 		
 		//Creo il grafo orientato GM dell'abbinamento massimo di G e oriento gli archi nel seguente modo
 		//archi che appartengono ad M da variabile a valore nel dominio
 		//archi che non appartengono ad M da valore nel dominio a variabile
 		Set<DefaultEdge> arcs = M.keySet();
+		notUsedArcs = new HashSet<DefaultEdge>();
+		
+		Mnode = new HashSet<Object>();
 		for(DefaultEdge a : arcs) {
 			
 			Object v = completeGraph.getEdgeSource(a);
@@ -343,10 +399,15 @@ public class Grafo {
 				if(M.get(a) != 0) {
 					//System.out.println("Arco: " + a.toString());
 					GM_Graph.addEdge(v, d);
+					
+					//aggiungo i nodi in Mnode che mi indica quali vertici appartendono ad M
+					if(!Mnode.contains(v))
+						Mnode.add(v);
+					if(!Mnode.contains(d))
+						Mnode.add(d);
 				}
 				else {
 					GM_Graph.addEdge(d, v);
-
 					//marco gli archi che sono in GM ma non in M come non usati
 					notUsedArcs.add(GM_Graph.getEdge(d, v));
 				}
@@ -354,48 +415,65 @@ public class Grafo {
 	
 		}
 		
-		//identifico i vertici M-free
-		//prendo i vertici in G ed in GM
-		Set<Object> verticesG = completeGraph.vertexSet();
-		Set<Object> verticesGM = GM_Graph.vertexSet();
-		M_Vertex = new HashSet<Object>();
-		
-		//ciclo su ogni vertice in G e verifico che non sia contenuto in GM: in quel caso è un vertice M-free
-		for(Object v : verticesG) {
-			if(!verticesGM.contains(v)) {
-				M_Vertex.add(v);
+		//cerco i vertici M-free
+		Set<Object> vertices = new HashSet<Object>(GM_Graph.vertexSet());
+		M_freeVertex = new HashSet<Object>();
+		//ciclo sui vertici v in GM e se incontro un vertice che non appartiene ad M lo aggiungo al vettore dei vertici M-free
+		for(Object v : vertices) {
+			if(!Mnode.contains(v)) {
+				M_freeVertex.add(v);
 			}
 		}
 		
-		System.out.println("GM: " + GM_Graph.toString());
-		System.out.println("M-free: " + M_Vertex.toString());
+		
+		//System.out.println("Mnode: " + Mnode.toString());
+		//System.out.println("M-free: " + M_freeVertex.toString());
 		
 	}
 	
 	
 	public void computeSCC() {
 		
-		StrongConnectivityInspector<Object, DefaultEdge> SCC = new StrongConnectivityInspector<Object, DefaultEdge>((DirectedGraph) GM_Graph);
+		System.out.println("\nGM: " + GM_Graph.toString());
+		
+		StrongConnectivityInspector<Object, DefaultEdge> SCC = new StrongConnectivityInspector<Object, DefaultEdge>((DirectedGraph<Object, DefaultEdge>) GM_Graph);
 		usedArcs = new HashSet<DefaultEdge>();
 		java.util.List<DirectedSubgraph<Object, DefaultEdge>> g = SCC.stronglyConnectedSubgraphs();
 		
-		System.out.println("Numero componenti: " + g.size());
 		BreadthFirstIterator<Object, DefaultEdge> it = null;
+		System.out.println("Numero componenti SCC: " + g.size());
 		
 		for(DirectedGraph<Object, DefaultEdge> c : g) {
-			//guardo se la prime componente contiene più di un vertice
-			if(c.vertexSet().size() != 1) {
+			
+			System.out.println("SCC: " + c);
+			
+			//se la componente contiene archi
+			if(c.edgeSet().size() != 0) {
 				//prendo tutti i suoi archi e li marco come usati
 				usedArcs.addAll(c.edgeSet());
 			}
-		}
-		
-		it = new BreadthFirstIterator<Object, DefaultEdge>(GM_Graph);
-		
-		while(it.hasNext()) {
-			Object vertex = it.next();
 			
 		}
+		
+		Object vertex = null;
+		Set<DefaultEdge> arcs = new HashSet<DefaultEdge>();
+		System.out.println("M-free: " + M_freeVertex);
+		for (Object free : M_freeVertex) {
+			//System.out.println("free: " + free);
+			//istanzio un iteratore iniziando da un vertice free
+			it = new BreadthFirstIterator<Object, DefaultEdge>(GM_Graph, free);
+			while(it.hasNext()) {
+				vertex = it.next();
+				arcs = GM_Graph.edgesOf(vertex);
+				for(DefaultEdge e : arcs) {
+					if(!usedArcs.contains(e)) {
+						usedArcs.add(e);
+					}
+				}
+			}	
+		}
+		
 	}
+	
 	
 }

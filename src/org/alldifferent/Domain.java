@@ -78,8 +78,12 @@ public class Domain {
 		}
 		buildInterval();
 	}
+	
+	//inserito per rimuovere un oggetto dal vettore
+	public void removeObject(Object i) {
+		values.remove(i);
 
-
+	}
 
 	public void removeValue(int i) {
 		values.remove(i);
