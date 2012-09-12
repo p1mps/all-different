@@ -26,40 +26,50 @@ import org.jgrapht.traverse.BreadthFirstIterator;
 import org.jgrapht.traverse.DepthFirstIterator;
 
 /**
- * @author simonetiso
+ * 
+ * <p>Questa classe denominata "Grafo" permette di creare un oggetto grafo e su di esso calcolare
+ * la consistenza sugli iperarchi mediante l'invocazione del metodo "hyperArcConsistency".</p>
  *
+ * @author Simone Tiso
+ * @version 1.0
  */
 public class Grafo {
 	
-	//grafo completo bipartito
+	/** <p>Grafo completo bipartito</p> */
 	private Graph<Object, DefaultEdge> completeGraph = null;
-	//grafo G_m costruito orientendo gli archi secondo l'appartenenza a M (accoppiamento massimo)
+	
+	/** <p>Grafo G_m costruito orientendo gli archi secondo l'appartenenza a M (accoppiamento massimo)</p> */
 	private Graph<Object, DefaultEdge> GM_Graph = null;
-	//Mappatura del calcolo dell'accoppiamento massimo di G
+	
+	/** <p>Mappatura del calcolo dell'accoppiamento massimo di G</p> */
 	private Map<DefaultEdge,Double> M = null;
-	//Vettore dei vertici liberi
+	
+	/** <p>Vettore dei vertici liberi M-free</p> */
 	private Set<Object> M_freeVertex = null;
-	//Vettore dei vertici appartenenti ad M
+	
+	/** <p>Vettore dei vertici appartenenti ad M</p> */
 	private Set<Object> Mnode = null;
  	
-	//vettore delle variabili
+	/** <p>Vettore delle variabili</p> */
 	private Vector<Variable> vars = null;
-	//vertici di inizio e fine per il calcolo del flusso massimo
+	
+	/** <p>Vertice di inizio per il calcolo del flusso massimo</p> */
 	private String startMMVertex;
+	
+	/** <p>Vertice di fine per il calcolo del flusso massimo</p> */
 	private String finishMMVertex;
-	//vettore archi usati
+	
+	/** <p>Vettore archi usati relativamente al calcolo della consistenza</p> */
 	private Set<DefaultEdge> usedArcs = null;
-	//vettore archi non usati
+	
+	/** <p>Vettore archi non usati relativamente al calcolo della consistenza</p> */
 	private Set<DefaultEdge> notUsedArcs = null;
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
-		int nValuesVars;
-		int nValuesDms;
-		Vector<Variable> vars = new Vector<Variable>();
 		
 		/*
 		//Definisco i valori dei domini
@@ -91,38 +101,20 @@ public class Grafo {
 		vars.add(1, new Variable(2,dX2));
 		vars.add(2, new Variable(3,dX3));
 		*/
-		int domCard = 3;
-		CSP c = new CSP();
-		c.generateRandom(domCard,"bipartite");
-		vars = c.getConstraint().getVariables();
-		nValuesVars = vars.size();
-		nValuesDms = domCard;
 		
-		System.out.println("Problema iniziale");
-		System.out.println(vars);
-		
-		System.out.print(vars.get(0).getDomain().getValues());
-		System.out.print(vars.get(1).getDomain().getValues());
-		System.out.println(vars.get(2).getDomain().getValues());
-		
-		Grafo g = new Grafo();
-		g.createBipartiteGraph(nValuesVars, nValuesDms, vars);
-		g.computeMaximumMatching();
-		g.computeSCC();
-		if(g.hyperArcConsistency()) {
-			System.out.println("\n\nProblema consistente");
-		}
-		else {
-			System.out.println("\n\nDominio vuoto ! il problema non ha soluzione");
-		}
-		System.out.println(vars);
-		System.out.print(vars.get(0).getDomain().getValues());
-		System.out.print(vars.get(1).getDomain().getValues());
-		System.out.println(vars.get(2).getDomain().getValues());
 	}
 	
-	
-	private boolean hyperArcConsistency() {
+	/**
+	 * <p>Metodo principale da invocare quando si decide di ottenere la cosistenza sugli archi in un determinato 
+	 * grafo.</p>
+	 *  
+	 * @return Ritorna true se si riesce ad ottenere la consistenza, altrimenti false
+	 */
+	public boolean hyperArcConsistency() {
+		
+		this.createBipartiteGraph(this.vars.size(), this.vars.size(), this.vars);
+		this.computeMaximumMatching();
+		this.computeSCC();
 		
 		Object s = null;
 		Object d = null;
@@ -153,9 +145,24 @@ public class Grafo {
 		
 		return true;
 	}
+	
+	/**
+	 * <p>Setta il vettore delle variabili</p>
+	 * 
+	 * @param variables vettore delle variabili usate dalla classe
+	 * 
+	 */
+	public void setVars(Vector<Variable> variables) {
+		this.vars = variables;
+	}
 
-
-	//rimpiazza un vecchio vertice con uno nuovo mantenendo le connessioni
+	/**
+	 * <p>Rimpiazza un vecchio vertice con uno nuovo mantenendo le connessioni</p>
+	 * 
+	 * @param oldVertex vecchio vertice da rimpiazzare
+	 * @param newVertex nuovo vertice da inserire
+	 * @return true se riesce a rimpiazzare il vertice, altrimenti false
+	 */
 	private boolean replaceVertex(Object oldVertex, Object newVertex)
     {
 		//controllo i parametri in ingresso
@@ -194,7 +201,13 @@ public class Grafo {
         return true;
     }
 	
-	//ritorna true se verAdj contiene tmp
+	/**
+	 * Ritorna true se verAdj contiene tmp
+	 * 
+	 * @param verAdj Insieme di vertici adiacenti ad un oggetto
+	 * @param tmp oggetto temporaneo per effettuare il confronto
+	 * 
+	 */
 	private boolean contains(Set<Object> verAdj, Object tmp) {
 		
 		Iterator<Object> it = verAdj.iterator();
@@ -209,7 +222,14 @@ public class Grafo {
 		
 	}
 	
-	//questo metodo crea un grafo bipartito con variabili e valori dei domini
+	/**
+	 * <p>Questo metodo crea un grafo bipartito con variabili e valori dei domini</p>
+	 * 
+	 * @param nValuesVars numero di variabili del grafo
+	 * @param nValuesDms numero di valori nei domini delle variabili
+	 * @param variables vettore delle variabili da inserire nel grafo bipartito
+	 * 
+	 */
 	public void createBipartiteGraph(int nValuesVars, int nValuesDms, Vector<Variable> variables) {
 		vars = variables;
 		startMMVertex = new String("S");
@@ -329,7 +349,12 @@ public class Grafo {
 		//System.out.println(completeGraph.toString());		
 	}
 	
-	//metodo che orienta gli archi da variabile a valore nel dominio
+	/**
+	 * <p>Metodo che orienta gli archi da variabile a valore nel dominio</p>
+	 * @param invertArc insieme degli archi da invertire
+	 * 
+	 *  
+	 */
 	private void arcSystem(Set<DefaultEdge> invertArc) {
 		
 		for(DefaultEdge e : invertArc) {
@@ -342,8 +367,11 @@ public class Grafo {
 		completeGraph.removeAllEdges(invertArc);
 	}
 
-
-	//metodo che stampa il grafo
+	/**
+	 * <p>Metodo che stampa il grafo con una formattazione predefinita</p>
+	 *  
+	 *  
+	 */
 	public void printGraph() {
 		
 		//Stampo la struttura del grafo
@@ -358,7 +386,11 @@ public class Grafo {
 	
 	}
 	
-	
+	/**
+	 * <p>Metodo che calcola il massimo accoppiamento tra le due partizioni del grafo bipartito</p>
+	 * 
+	 *  
+	 */
 	public void computeMaximumMatching() {
 		
 		GM_Graph = new SimpleDirectedGraph<Object, DefaultEdge>(DefaultEdge.class);
@@ -368,7 +400,7 @@ public class Grafo {
 		MM.calculateMaximumFlow(startMMVertex, finishMMVertex);
 		M = new HashMap<DefaultEdge, Double>(MM.getMaximumFlow());
 		
-		
+		//rimuovo i vertici per il calcolo del flusso
 		completeGraph.removeVertex(startMMVertex);
 		completeGraph.removeVertex(finishMMVertex);
 		
@@ -431,7 +463,11 @@ public class Grafo {
 		
 	}
 	
-	
+	/**
+	 * <p>Metodo che calcola le componenti fortemente connesse del grafo</p>
+	 *  
+	 *  
+	 */
 	public void computeSCC() {
 		
 		System.out.println("\nGM: " + GM_Graph.toString());
