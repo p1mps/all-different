@@ -1,21 +1,16 @@
 package org.alldifferent;
 
-
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.Character.Subset;
 import java.util.Calendar;
 import java.util.Vector;
-
-import javax.sound.midi.SysexMessage;
 
 //tipi di consistenza da applicare durante il backtracking
 
 
-public  class CSP {
+public class CSP {
 
 
 	static private Algo algo;
@@ -325,9 +320,9 @@ public  class CSP {
 
 		//trovo tutti i sottoinsiemi delle variabili
 		//		System.out.println("solving range");
-		/*
-		Vector<Vector<Variable>> subsets = Subset.getSubsets(this.constraint.getVariables());
-
+		
+		Vector<Vector<Variable>> subsets = org.alldifferent.Subset.getSubsets(this.constraint.getVariables());
+		
 		for (int v = 0; v < this.constraint.getVariables().size(); v++) {
 			for (int i = 0; i < subsets.size(); i++) {
 				for (int j = 0; j < subsets.get(i).size(); j++) {
@@ -355,7 +350,7 @@ public  class CSP {
 				}
 
 			}
-		}*/
+		}
 
 	}
 
@@ -480,7 +475,7 @@ public  class CSP {
 		Vector<Variable> vars = new Vector<Variable>();
 		
 		CSP ch = new CSP();
-		ch.generateRandom(3,"bipartite");
+		ch.generateRandom(8,"bipartite");
 		vars = ch.getConstraint().getVariables();
 		
 		System.out.println("Problema iniziale");
