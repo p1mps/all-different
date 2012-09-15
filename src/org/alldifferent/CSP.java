@@ -156,7 +156,7 @@ public class CSP {
 			
 			CSP copy = new CSP(this);
 			long lettura = 0;
-			/*
+			
 			chronometer.start();
 			finishedTimes.add(chronometer.read());
 			this.backtracking(0, false, copy);
@@ -165,7 +165,7 @@ public class CSP {
 			chronometer.clean();
 			this.dumpTimes("tempo "+lettura);
 			sumTime = sumTime + lettura;
-			*/
+			
 		}
 		
 		averageTime = sumTime/100.0;
@@ -437,6 +437,23 @@ public class CSP {
 						}
 
 						break;
+						
+					case bipartite:
+						consHyperArcConststent();
+						if(consistent()){
+							success = false;
+							backtracking(j+1, success, copy);
+
+						}
+						else{
+							this.setConstraint(new ConstraintAllDifferent(copy.getConstraint()));
+							this.constraint.getVariables().get(j).getDomain().removeValue(d);
+							this.constraint.getVariables().get(j).getDomain().buildInterval();
+							this.consistent = false;
+							copy = new CSP(this);
+						}
+
+						break;
 					}
 				}
 			}
@@ -445,6 +462,26 @@ public class CSP {
 		}
 	}
 
+
+	private void consHyperArcConststent() {
+		
+		Vector<Variable> vars = new Vector<Variable>();
+		
+		//CSP ch = new CSP();
+		//ch.generateRandom(8,"bipartite");
+		vars = this.getConstraint().getVariables();
+		
+		Grafo g = new Grafo();
+		g.setVars(vars);
+		
+		if(g.hyperArcConsistency()) {
+			System.out.println("\n\nProblema consistente");
+		}
+		else {
+			System.out.println("\n\nDominio vuoto ! il problema non ha soluzione");
+		}
+		//System.out.println(vars);
+	}
 
 	public String toString() {
 
@@ -455,7 +492,7 @@ public class CSP {
 	}
 
 	public static void main(String[] args) {
-		/*
+		
 		if(args.length < 2){
 			System.out.println("usage: num_variables algo-consistency [arc bounds range" +
 					" bipartite]");
@@ -470,27 +507,7 @@ public class CSP {
 		}
 		
 		System.out.println("Problems generated and solved :)");
-		*/
-		/*SIMO*/
-		Vector<Variable> vars = new Vector<Variable>();
 		
-		CSP ch = new CSP();
-		ch.generateRandom(8,"bipartite");
-		vars = ch.getConstraint().getVariables();
-		
-		System.out.println("Problema iniziale");
-		System.out.println(vars);
-		
-		Grafo g = new Grafo();
-		g.setVars(vars);
-		
-		if(g.hyperArcConsistency()) {
-			System.out.println("\n\nProblema consistente");
-		}
-		else {
-			System.out.println("\n\nDominio vuoto ! il problema non ha soluzione");
-		}
-		System.out.println(vars);
 	}
 
 
