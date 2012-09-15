@@ -119,9 +119,6 @@ public class Grafo {
 		Object s = null;
 		Object d = null;
 		
-		System.out.println("\nArchi usati: " + usedArcs);
-		System.out.println("Archi non usati: " + notUsedArcs);
-		
 		Variable tmp;
 		for(DefaultEdge a : notUsedArcs) {
 			
@@ -295,8 +292,6 @@ public class Grafo {
 			if(completeGraph.getEdgeSource(e).getClass() == Variable.class) {
 				Variable source = (Variable) completeGraph.getEdgeSource(e);
 				Integer target = (Integer) completeGraph.getEdgeTarget(e);
-				//System.out.println("Valore nel dominio: " + source.getDomain().getValues());
-				//System.out.println("Valore target: " + target.intValue());
 				if(!source.getDomain().getValues().contains(target)) {
 					//aggiungo l'arco nel vettore delle rimozioni
 					temp.add(e);
@@ -306,8 +301,6 @@ public class Grafo {
 				//controllo gli archi la cui sorgente è un valore del dominio
 				Integer source = (Integer) completeGraph.getEdgeSource(e);
 				Variable target = (Variable) completeGraph.getEdgeTarget(e);
-				//System.out.println("Valore nel dominio: " + target.getDomain().getValues());
-				//System.out.println("Valore target: " + source.intValue());
 				if(!target.getDomain().getValues().contains(source)) {
 					//aggiungo l'arco nel vettore delle rimozioni
 					temp.add(e);
@@ -344,9 +337,6 @@ public class Grafo {
 			
 		}
 		
-		printGraph();
-
-		//System.out.println(completeGraph.toString());		
 	}
 	
 	/**
@@ -405,8 +395,6 @@ public class Grafo {
 		completeGraph.removeVertex(finishMMVertex);
 		
 		
-		System.out.println("\nM: " + M.toString());
-		
 		//Creo il grafo orientato GM dell'abbinamento massimo di G e oriento gli archi nel seguente modo
 		//archi che appartengono ad M da variabile a valore nel dominio
 		//archi che non appartengono ad M da valore nel dominio a variabile
@@ -429,7 +417,6 @@ public class Grafo {
 				
 				//oriento l'arco nel modo opportuno
 				if(M.get(a) != 0) {
-					//System.out.println("Arco: " + a.toString());
 					GM_Graph.addEdge(v, d);
 					
 					//aggiungo i nodi in Mnode che mi indica quali vertici appartendono ad M
@@ -457,10 +444,6 @@ public class Grafo {
 			}
 		}
 		
-		
-		//System.out.println("Mnode: " + Mnode.toString());
-		//System.out.println("M-free: " + M_freeVertex.toString());
-		
 	}
 	
 	/**
@@ -470,18 +453,13 @@ public class Grafo {
 	 */
 	public void computeSCC() {
 		
-		System.out.println("\nGM: " + GM_Graph.toString());
-		
 		StrongConnectivityInspector<Object, DefaultEdge> SCC = new StrongConnectivityInspector<Object, DefaultEdge>((DirectedGraph<Object, DefaultEdge>) GM_Graph);
 		usedArcs = new HashSet<DefaultEdge>();
 		java.util.List<DirectedSubgraph<Object, DefaultEdge>> g = SCC.stronglyConnectedSubgraphs();
 		
 		BreadthFirstIterator<Object, DefaultEdge> it = null;
-		System.out.println("Numero componenti SCC: " + g.size());
 		
 		for(DirectedGraph<Object, DefaultEdge> c : g) {
-			
-			System.out.println("SCC: " + c);
 			
 			//se la componente contiene archi
 			if(c.edgeSet().size() != 0) {
@@ -493,9 +471,7 @@ public class Grafo {
 		
 		Object vertex = null;
 		Set<DefaultEdge> arcs = new HashSet<DefaultEdge>();
-		System.out.println("M-free: " + M_freeVertex);
 		for (Object free : M_freeVertex) {
-			//System.out.println("free: " + free);
 			//istanzio un iteratore iniziando da un vertice free
 			it = new BreadthFirstIterator<Object, DefaultEdge>(GM_Graph, free);
 			while(it.hasNext()) {

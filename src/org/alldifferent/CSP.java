@@ -462,25 +462,15 @@ public class CSP {
 		}
 	}
 
-
+	//Metodo che ottiene la consistenza sugli iperarchi
 	private void consHyperArcConststent() {
 		
 		Vector<Variable> vars = new Vector<Variable>();
-		
-		//CSP ch = new CSP();
-		//ch.generateRandom(8,"bipartite");
 		vars = this.getConstraint().getVariables();
-		
 		Grafo g = new Grafo();
 		g.setVars(vars);
-		
-		if(g.hyperArcConsistency()) {
-			System.out.println("\n\nProblema consistente");
-		}
-		else {
-			System.out.println("\n\nDominio vuoto ! il problema non ha soluzione");
-		}
-		//System.out.println(vars);
+		g.hyperArcConsistency();
+
 	}
 
 	public String toString() {
@@ -502,7 +492,7 @@ public class CSP {
 		System.out.println("solving problems... take a look at " + args[1] + " logs");
 		
 		CSP c = new CSP();
-		for (int i = 1; i < Integer.parseInt(args[0]); i++) {
+		for (int i = 1; i <= Integer.parseInt(args[0]); i++) {
 			c.generateRandom(i,args[1]);	
 		}
 		
