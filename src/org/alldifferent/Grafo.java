@@ -63,45 +63,6 @@ public class Grafo {
 	private Set<DefaultEdge> notUsedArcs = null;
 	
 	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
-		/*
-		//Definisco i valori dei domini
-		Vector<Integer> valuesX1 = new Vector<Integer>();
-		Vector<Integer> valuesX2 = new Vector<Integer>();
-		Vector<Integer> valuesX3 = new Vector<Integer>();
-
-		valuesX1.add(1);
-		//valuesX1.add(1);
-		valuesX1.add(2);
-		//valuesX2.add(3);
-		valuesX2.add(2);
-		valuesX2.add(0);
-		//valuesX3.add(0);
-		valuesX3.add(1);
-		//valuesX3.add(2);
-
-		Domain dX1 = new Domain();
-		Domain dX2 = new Domain();
-		Domain dX3 = new Domain();
-
-		dX1.setValues(valuesX1);
-		dX2.setValues(valuesX2);
-		dX3.setValues(valuesX3);
-		
-		//definisco le variabili
-		
-		vars.add(0, new Variable(1,dX1));
-		vars.add(1, new Variable(2,dX2));
-		vars.add(2, new Variable(3,dX3));
-		*/
-		
-	}
-	
-	/**
 	 * <p>Metodo principale da invocare quando si decide di ottenere la cosistenza sugli archi in un determinato 
 	 * grafo.</p>
 	 *  
