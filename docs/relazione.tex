@@ -1,47 +1,501 @@
-\documentclass[a4paper,12pt]{article} % Prepara un documento per carta A4, con un bel font grande
-% impostazioni generali del documento, valide per tutti gli scritti.
-\usepackage[babel]{csquotes}
-\usepackage[style=numeric]{biblatex}  
+%% LyX 1.6.9 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{url}
+\usepackage{amstext}
+\usepackage{graphicx}
+\usepackage{amssymb}
 
-\usepackage{graphicx} % per l'inserimento di immagini.
-\usepackage{listings}
-\usepackage[italian]{babel} % Adatta LaTeX alle convenzioni tipografiche italiane,
-% e ridefinisce alcuni titoli in italiano, come "Capitolo" al posto di "Chapter", se il vostro documento in italiano
-\usepackage[utf8]{inputenc} % Consente l'uso caratteri accentati italiani
-\usepackage{amsfonts}
+\makeatletter
 
-\usepackage{fancyhdr} % per il controllo delle intestazioni.
-\usepackage{totpages} % macro per conoscere il tatale delle pagine
-\usepackage{longtable} % tabelle che vanno su piï¿½ pagine
-\frenchspacing % forza LaTeX ad una spaziatura fra parole non inglesi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+%% A simple dot to overcome graphicx limitations
+\newcommand{\lyxdot}{.}
 
-\pagestyle{fancy}
 
-\newcommand{\linkref}[1]{{\footnotesize \textsl{#1}}}
+\makeatother
 
-% fine delle impostazioni generali
-\bibliography{relazione}
-\newtoks\titolo % definisco un nuovo comando \titolo che restituisce il titolo.
-\newtoks\versione % definisco un nuovo comando \versione che restituisce il versione.
-\newtoks\data   % definisco un nuovo comando \data che restituisce la data.
-
-\titolo={All different constraint solver} % inserire qui il titolo
-
-\data={\today}       % today restituisce il valore del giorno in cui si genera il pdf.
-
-\title{\bf \the\titolo}
-\author{Andrea Imparato\thanks{M: 623480 - E: imparato.andrea@gmail.com}}               
-\date{\today}
-
-\input{intestazione.tex} % inserisco le intestazioni del doc: logo, nome etc..
+\usepackage{babel}
 
 \begin{document}
+\begin{center}
+\textbf{\Huge CSP alldifferent}
+\par\end{center}{\Huge \par}
 
-\input{prima_pagina.tex}
+\begin{center}
+\textbf{\Huge backtracking e consistenza }
+\par\end{center}{\Huge \par}
+
+\begin{center}
+\textbf{\Huge locale}{\Huge{} }
+\par\end{center}{\Huge \par}
 
 
-\printbibliography
+
+\begin{center}
+{\Large Progetto di Sistemi con vincoli } 
+\par\end{center}
 
 
 
+\begin{center}
+{\Large a.a. 2011/2012 } 
+\par\end{center}
+
+
+
+\begin{center}
+{\Large Docente: prof.ssa Francesca Rossi} 
+\par\end{center}
+
+\begin{center}
+{\Large Autori: Simone Tiso, Andrea Imparato} 
+\par\end{center}
+
+
+
+
+\section{Il vincolo alldifferent}
+
+In questo documento verrà analizzato il problema con vincoli alldifferent
+che riveste una particolare importanza nella programmazione 
+con vincoli per il suo frequente utilizzo e la sua non così ovvia
+implementazione. Il problema si presenta naturalmente in una larga
+varietà di problemi come ad esempio i puzzle, il problema delle n
+regine o i problemi di schedulazione e assegnamento. Affinchè il vincolo
+alldifferent sia soddisfatto deve essere possibile assegnare un valore
+diverso ad ogni variabile scegliendolo nel dominio della stessa. Un
+possibile esempio di problema alldifferent può essere:
+
+$x_{1}=\{1,2\}x_{2}=\{2\}x_{3}=\{2,3\}$ ammette soluzione con il
+seguente assegnamento per le variabili: $ $$x_{1}=1x_{2}=2x_{3}=3$
+. 
+
+Più formalmente si ha che:
+
+\begin{center}
+\emph{Siano x$_{1}$, x$_{2}$, . . . , x$_{n}$ variabili con i rispettivi
+domini D$_{x1}$,D$_{x2}$, . . . , D$_{xn}$ allora } 
+\par\end{center}
+
+\begin{center}
+\emph{alldifferent(x$_{1}$, x$_{2}$, . . . , x$_{n}$) è consistente
+se e solo se} 
+\par\end{center}
+
+\begin{center}
+\emph{(x$_{1}$, x$_{2}$, . . . , x$_{n}$) }$\in$\emph{ \{ (d$_{1}$,
+d$_{2}$, . . . , d$_{n}$) | d$_{i}$ }$\in$\emph{ D$_{xi}$, d$_{i}$
+$\neq$ d$_{j}$, i $\neq$ j \}} 
+\par\end{center}
+
+Con la definizione precedente il problema è definito da un solo vincolo
+n-ario, questo non ci permette di ottenere buone prestazioni a livello
+computazionale. E' necessario dunque una scomposizione del problema
+che permetta ovviamente di preservare l'insieme delle soluzioni del
+problema originario. Per questo vincolo possiamo attuare la decomposizione
+binaria, così definita:
+
+\begin{center}
+\emph{Sia C un vincolo su $x_{1},\cdots,x_{n}$. Una decomposizione
+binaria di C è un insieme minimale di vincoli binari $C_{d}ec$= \{$C_{1},\cdots,C_{k}$\}
+(per k>0) sulle coppie di variabili $x_{1},\cdots,x_{n}$ tali che
+l'insieme delle soluzioni di C sia equivalente all'insieme delle soluzioni
+di $\cap_{i=1}^{k}C_{i}$}.
+\par\end{center}
+
+\begin{center}
+La decomposizione binaria di alldifferent($x_{1},\cdots,x_{n}$) dunque
+è:\\
+
+\par\end{center}
+
+\begin{center}
+$\bigcup_{1\leq i<j\leq n}{x_{i}\neq x_{j}}$
+\par\end{center}
+
+\begin{center}
+In questo modo otteniamo una definizione del problema equivalente
+a quella data ma lo sforzo computazionale per risolverla è di gran
+lunga ridotto e possiamo applicare i nostri algoritmi di consistenza.
+\par\end{center}
+
+
+\section{Generazione casuale di problemi}
+
+Al fine di testare le implementazioni dei vari algoritmi di consistenza
+da noi trattati in questo documento, è stato necessario ideare un
+metodo per la generazione di problemi casuali, l'algoritmo per la
+generazione dei CSP funziona nel seguente modo:
+
+Riceve in input il numero $n$ di variabili del problema da generare,
+per ciascuna variabile $x_{i}$ il suo dominio viene inizializzato
+con valori nell'intervallo $\left[a,b\right]$ , $a\leq b$ , con
+$a$ e $b$ scelti casualmente in modo uniforme nell'intervallo $1$.
+. .$n$. 
+
+
+\section{Backtracking}
+
+Per ottenere una soluzione di un problema alldifferent è necessario
+implementare un algoritmo di ricerca nello spazio delle soluzioni
+del problema stesso, lo pseudocodice dell'algoritmo in questione si
+può trovare all'indirizzo \url{http://www.math.unipd.it/~frossi/2007-ch8.pdf}.
+A grandi linee l'algoritmo funziona nel seguente modo:
+
+Per ogni $v_{i}$ variabile del problema, per ogni $d_{j}$valore
+del dominio della variabile $v_{i}$ , l'algoritmo istanzia $D_{v_{i}}=\{d_{j}\}$
+. Nella versione del backtracking senza {}``domain filtering'' dopo
+aver scelto per ogni variabile un valore del suo dominio, dovrebbe
+essere necessario controllare se l'assegnamento ottenuto è una soluzione
+o meno del problema e questo comporta un aumento esponenziale dell'albero
+di ricerca. Per effettuare un pruning dell'albero di ricerca sono
+stati implementati vari algoritmi che ottengono la consistenza locale
+dei problemi. In questo modo infatti durante la ricerca è possibile
+vedere a priori se un problema è consistente o meno prima di aver
+assegnato ad ogni variabile un valore.
+
+
+\section{Consistenza locale}
+
+Abbiamo implementato diversi algoritmi per ottenere la consistenza
+locale. Di seguito una descrizione approfondita per ognuno di essi.
+
+
+\subsection{Arc Consistency}
+
+Un vincolo binario $C\text{(x1,x2) }$ è consistente sugli archi se
+per ogni valore di $d1$$\in x1$ $ $esiste un valore $d2\in x2$
+tale che $(d1,d2)\in C$ , e per ogni valore $d2\in x2$ esiste un
+valore $d1\in x1$ tale che $(d1,d2)\in C$ . Per ottenere la consistenza
+sugli archi dopo aver effettuato la decomposizione binaria del problema
+alldifferent basta procedere nel seguente modo:
+
+Ogni qualvolta il dominio di una variabile contiene un solo valore,
+questo viene rimosso dai domini delle altre variabili. Questo è ripetuto
+fino a quando non si ottiene un dominio vuoto o nessun dominio viene
+cambiato.
+
+
+\subsection{Intervallo di Hall}
+
+Prima di introdurre la bounds consistency è necessario definire cos'è
+un intervallo di Hall: 
+
+Siano \emph{x$_{1}$, x$_{2}$, . . . , x$_{n}$ variabili con i rispettivi
+domini finiti D$_{x1}$,D$_{x2}$, . . . , D$_{xn}$. Dato un intervallo
+$i$, definiamo $K_{i}=\{x_{i}|d_{i}\subseteq i\}$ . $i$ è un intervallo
+di Hall se $|i|=|K_{i}|$ . Le variabli esterne all'intervallo $K_{i}$
+dovreanno assumere valori al di fuori dell'intevallo $i$ .}
+
+
+\subsection{Bounds Consistency}
+
+Il vincolo alldifferent(\emph{x$_{1}$, x$_{2}$, . . . , x$_{n}$})
+è bounds consistent se e solo se $|D_{i}|\geqslant1$ $i=(1...n)$
+e
+\begin{enumerate}
+\item Per ogni intervallo $i$: $|K_{i}|\leqslant i$ 
+\item Per ogni intervallo di Hall $i:\{minD_{i},maxD_{i}\}$ $\bigcap$
+$I=\emptyset$ per ogni $x_{i}\notin K_{I}$.
+\end{enumerate}
+
+\subsection{Insieme di Hall}
+
+Siano \emph{x$_{1}$, x$_{2}$, . . . , x$_{n}$ variabili con i rispettivi
+domini finiti D$_{x1}$,D$_{x2}$, . . . , D$_{xn}$. Dato $K\subseteq\{x_{1},x_{2},...,x_{n}\}$
+,definiamo l'intervallo $I_{K}=\left[minD_{K},maxD_{K}\right]$ .
+K è un insieme di Hall se $|K|=|I_{K}|$.}
+
+
+\subsection{Range Consistency}
+
+Il vincolo alldifferent(\emph{x$_{1}$, x$_{2}$, . . . , x$_{n}$})
+è range consistent se e solo se $|D_{i}|\geqslant1$ $i=(1...n)$
+e $D_{i}\bigcap I_{K}=\emptyset$ per ogni insieme di Hall $K\subseteq x_{1},x_{2},...,x_{n}$
+e $x_{i}\notin K$.
+
+
+\section{Teoria dei Grafi}
+
+Per comprendere meglio l'algoritmo in questione e capire fino in fondo
+il suo funzionamento occorre introdurre alcune nozioni 
+sui grafi. In questa sezione inoltre vengono presentati alcuni
+teoremi principali utilizzati dall'algoritmo per calcolare la consistenza
+sugli iperarchi.
+
+Un grafo è definito informalmente come una coppia $G=\left(V,E\right)$
+dove $V$ è un insieme finito di vertici ed $E$ è un insieme finito
+di coppie $\left(V,V\right)$ chiamate archi. Un arco da $u\epsilon V$
+a $v\epsilon V$ è indicato con $uv$. Un grafo orientato contiene
+al suo interno {}``archi orientati '' ossia archi caratterizzati
+da una direzione (es: arco da $u$ a $v$). Un grafo $G=\left(V,E\right)$
+è \emph{bipartito }se esiste una partizione $S,T$ tale che $E\subseteq\left\{ s,t\mid s\epsilon S,t\epsilon T\right\} $,
+denotato anche $G=\left(S,T,E\right)$.
+
+
+\subsection{Matching theory}
+
+Dato un grafo non orientato $G=\left(V,E\right)$, un \emph{matching
+}in G è un insieme $M\subseteq E$ di archi disgiunti (ex: due archi
+in M non possono condividere un vertice). Da questo si ricavano alcune
+nozioni importanti per la costruzione e la gestione del grafo:
+\begin{itemize}
+\item \emph{M-free }vertex: Vertice v che non è coperto da M in G.
+\item \emph{Massimo accoppiamento: }si tratta di trovare il massimo accoppiamento
+tra i vertici nelle due partizioni del grafo, in particolare si cerca
+di trovare un accoppiamento di grado massimo quindi da coprire più
+vertici possibile.
+\item \emph{Path M-augmentin: }Sia M un maching in G, P è chiamato M-augmentin
+se P ha lunghezza dispari, termina in un vertice fuori da M, ed i
+suoi archi sono alternativamente furi e dentro M.
+\item \emph{M-alternating: }Un circuito C è chiamato M-alternating se i
+suoi archi sono alternativamente fuori e dentro M.
+\end{itemize}
+
+\subsection{Jgrapht}
+
+JGraphT è una libreria grafica open-source in Java che fornisce degli
+oggetti e algoritmi matematici basati sulla teoria dei grafi..JGraphT
+supporta vari tipi di grafi tra cui:
+\begin{itemize}
+\item Grafi orientati e non orientati;
+\item Grafi con archi pesati / non pesati / etichettati o di un qualsiasi
+tipo definito dall'utente;
+\item Varie opzioni di molteplicità di arco, tra cui: 
+
+\begin{itemize}
+\item grafi semplici-multigraphs, pseudographs;
+\item grafi non modificabili - moduli che permettono di fornire un accesso
+\textquotedbl{}sola lettura\textquotedbl{} per i grafi interni;
+\item grafi e sottografi che sono auto-aggiornamento delle viste sottografo
+su altri grafici.;
+\end{itemize}
+\end{itemize}
+Anche se potente, JGraphT è stato progettato per essere semplice e
+type-safe (via generici Java). Per esempio, i vertici di un grafo
+possono essere di qualsiasi oggetto, inoltre è possibile creare grafi
+in base a: Stringhe, URLs, documenti XML, ecc, si può creare anche
+grafici di grafici. Oltre a questo sono implementati alcuni algoritmi
+particolarmente ottimizzati per operazioni su grafi, alcuni di questi
+sono descritti di seguito:
+\begin{itemize}
+\item \emph{ConnectivityInspector : }Ispeziona il grafo per controllare
+se è di tipo {}``connesso'';
+\item \emph{CycleDetector : }Controlla se sono presenti cicli all'interno
+del grafo;
+\item \emph{EdmondsKarpMaximumFlow : }Utilizza l'algoritmo di Edmonds-Karp
+per calcolare il {}``Flusso massimo'', oltre che il valore del flusso
+questa classe ritorna anche il sottografo corrispondente;
+\item \emph{KruskalMinimumSpanningTree :} Calcola l'albero di copertura
+minimo del grafo;
+\item \emph{StrongConnectivityInspector : }Questa classe controlla se il
+grafo è fortemente connesso e ritorna una lista di sottografi corrispondenti
+alle componenti fortemente connesse del grafo di partenza.
+\end{itemize}
+
+\section{Implementazione Algoritmo}
+
+Questo algoritmo per ottenere la consistenza sugli iperarchi per il
+vincolo all-different è stato proposto da Règin (1994) e si basa fondamentalmente
+sulla teoria del matching, descritta nella sezione 2.1. Per l'implementazione
+di questo algoritmo si è utilizzato il linguaggio java che pur essendo
+più lento in termini computazionali offre una maggior versatilità
+in merito alle librerie che occorrevano a questo progetto. Di seguito
+definiamo alcuni teoremi necessari a descrivere successivamente il
+funzionamento dell'algoritmo.
+\begin{itemize}
+\item \emph{Definizione 1 (Tight set): }Siano\emph{ x$_{1}$, x$_{2}$,
+. . . , x$_{n}$ }variabili con rispettivi domini finiti D$_{1}$,
+D$_{2}$, . . . , D$_{n}$, $K\subseteq\left\{ x_{1},x_{2},...,x_{n}\right\} $
+è un \emph{tight set} se $ $$\mid K\mid=\mid D_{K}\mid$ .
+\item \emph{Teorema 1: }Il vincolo all-different(\emph{x$_{1}$, x$_{2}$,
+. . . , x$_{n}$}) è consistente sugli iperarchi se e solo se $\mid D_{i}\mid\geq1$
+$\left(i=1,\ldots,n\right)$ e $D_{i}\bigcap D_{K}=\textrm{Ø }$ per
+ogni tight set $K\subseteq\left\{ x_{1},x_{2},...,x_{n}\right\} $
+e ogni $x_{i}\notin K$.
+\end{itemize}
+Seguendo il teorema 1 il problema di consistenza potrebbe essere sviluppato
+generando tutti i tight set K ed aggiornando i relativi domini per
+tutte le variabili, similmente a ciò che si farebbe per la consistenza
+sui limiti e sugli intervalli. Tuttavia nella pratica questo tipo
+di approccio è irrealizzabile, in quanto il numero di sottoinsiemi
+K su n variabili è esponenziale in n. Per questo motivo si utilizzano
+i grafi, in particolare la \emph{matching theory} riferita ad essi.
+\begin{itemize}
+\item \emph{Definizione 2 (value graph): }Sia X una sequenza di variabili.
+Il grafo bipartito $G=\left(X,D\left(X\right),E\right)$ con $E=\left\{ xd\mid d\in D\left(x\right),x\in X\right\} $
+è chiamato il grafo dei valori di X.
+\item \emph{Teorema 2: }Sia G un grafo e M un accoppiamento massimo in G.
+Un arco appartiene all'accoppiamento massimo in G se e solo se: o
+appartiene ad M, o ad un ancora M-alternating path partendo da un
+vertice M-free, o ad un ancora in un M-alternating circuito.
+\end{itemize}
+L'algoritmo inizia costruendo il value graph G relativamente alla
+sequenza di variabili del problema, in particolare ogni variabile
+è rappresentata da un oggetto che al suo interno contiene il relativo
+dominio. Il problema è rappresentato da questo grafo G bipartito orientato,
+il quale contiene le variabili \emph{x$_{1}$, x$_{2}$, . . . , x$_{n}$}
+in una partizione e i valori dei domini $1,2,\ldots,n$ , in particolare
+ogni variabile è connessa ai valori del suo dominio mediante $n$
+archi, orientati dalla variabile al valore, con $n=\left|D_{n}\right|$
+. Una rappresentazione grafica si può vedere nella figura seguente:
+
+\begin{center}
+\includegraphics[scale=0.5]{\string"Relazione finale allDifferent/Grafo 1\string".png}
+\par\end{center}
+
+\begin{center}
+Grafo orientato bipartito
+\par\end{center}
+
+\medskip{}
+
+
+Una volta che il grafo è creato si calcola l'accoppiamento massimo
+M in G, inserendo due vertici S (sorgente) ed F (destinazione) al
+grafo G. Il vertice S è connesso a tutte le variabili attraverso archi:
+orientati da S a variabile, analogamente il vertice F è connesso a
+tutti i valori dei domini: da valore a vertice F. Ci si è serviti
+di questa particolare modifica per applicare l'algoritmo di Edmund-karp,
+il quale permette di calcolare il sottografo relativo al flusso che
+parte da un sorgente S e raggiunge una destinazione F in $O\left(VE\right)$
+. A seguito di questa piccola modifica è possibile ottenere l'accoppiamento
+massimo M in G. Inoltre è necessario effettuare un controllo sulla
+cardinalità di M, in particolare se quest'ultima dovesse risultare
+minore rispetto alla cardinalità di X (numero di variabili) significherebbe
+che nell'accoppiamento massimo non sono presenti tutte le variabili
+del problema, per cui non ci sarebbe speranza di ottenere la consistenza.
+In questo caso l'algoritmo ritorna un valore di tipo {}``false''.
+
+Il grafo risultante è mostrato nella figura seguente:
+
+\begin{center}
+\includegraphics[scale=0.5]{\string"Relazione finale allDifferent/Grafo 3\string".png}
+\par\end{center}
+
+\begin{center}
+Grafo massimo accoppiamento
+\par\end{center}
+
+\medskip{}
+
+
+Successivamente è definito in nuovo grafo G$_{M}$ costruito nel modo
+seguente: gli archi che appartengono ad M sono orientati dalla variabile
+dal relativo valore nel dominio, mentre gli archi che non appartengono
+ad M sono orientati nel verso opposto come in figura seguente:
+
+\begin{center}
+\includegraphics[scale=0.5]{\string"Relazione finale allDifferent/Grafo 5\string".png}
+\par\end{center}
+
+\begin{center}
+Grafo orientato bipartito $G_{M}$
+\par\end{center}
+
+\medskip{}
+
+
+Inizialmente in questo grafo tutti gli archi sono marcati come {}``inconsistenti''.
+Fatto questo si calcolano le componenti fortemente connesse del grafo
+G$_{M}$ sfruttando una classe disponibile nel pacchetto {}``jgrapht'',
+la quale ritorna una lista di sottografi orientati definiti come {}``componenti
+fortemente connesse''. Gli archi tra vertici di una stessa componente
+fortemente connessa appartengono ad un {}``M-alternating circuit''
+in G$_{M}$ e vengono marcati come consistenti a prescindere dal verso
+in cui sono nel grafo. Successivamente si cercano i vertici M-free
+(vedi definizione sezione 2.1) e si esegue una ricerca breadth-first
+partendo proprio da essi, in questo modo si ispezionano tutti gli
+archi connessi e quest'ultimi si marcano come {}``consistenti''
+perchè appartengono ad un cammino diretto al grafo G$_{M}$ con sorgente
+un vertice M-free. Questo lo si fa in tempo $O\left(m\right)$ con
+$m=$ numero degli archi.
+
+Dopo aver preparato la struttura dati (il grafo) ed agito su di essa,
+è possibile considerare fisicamente i domini delle variabili effettuando
+un {}``ciclo for'' su tutti gli archi del grafo $G_{M}$ marcati
+come {}``inconsistenti''. Per ogni arco $xd$ si esegue la seguente
+istruzione: $D(x)=D(x)-d$, in pratica si rimuove il valore $d$ dal
+dominio della variabile $x$ . Se qualche dominio dovesse diventare
+vuoto nel corso del processo $ $di rimozione dei valori, l'algoritmo
+ritorna un valore di tipo {}``false''. Se invece il ciclo termina
+con almeno un valore dentro il dominio di ogni variabile l'algoritmo
+ritorna un valore {}``true'' per indicare che è stata ottenuta la
+consistenza.
+
+In conclusione questo algoritmo permette di controllare se un problema
+è consistente sugli iperarchi, in caso contrario renderlo tale, relativamente
+al vincolo all-Different con un sforzo computazionale di $O(m\sqrt{n})$.
+
+
+\section{Implementazione}
+
+Di seguito lo schema UML relativo alle classi del progetto
+
+\begin{center}
+\includegraphics[scale=0.5]{/Users/simonetiso/Documents/workspace/all-different/docs/classi}
+\par\end{center}
+\begin{itemize}
+\item \emph{CSP: }Rappresenta il problema alldifferent 
+\item \emph{CostraintAllDifferent}: il vincolo del problema contiene al
+suo interno le variabili
+\item \emph{Range: }intervallo globale delle variabili
+\item \emph{Variable: }variabili del problema
+\item \emph{Domain: }dominio intero delle variabili
+\item \emph{Grafo: }rappresenta il grafo utilizzato dall'algoritmo hyperArcConsistency.
+\end{itemize}
+
+\section{Manuale d'uso}
+
+Per avviare l'applicazione dare il seguente comando: \emph{java -jar
+project.jar $\left[numVar\right]$ $\left[algoConsistenza\right]$
+}dove numVar indica il limite massimo di variabili dei problemi generati
+casualmente e algoConsistenza è rispettivamente: \emph{{}``arc, bounds,
+range, bipartite''} ed indica il rispettivo algoritmo di consistenza
+da applicare. Per ogni istanza il programma genera due file di log
+che hanno nome {}``algoConsistenza time.txt'' e {}``algoConsistenza
+log.txt'' che contengono rispettivamente: il primo la media dei tempi
+di esecuzione per ogni problema generato con variabili da 1 a numVar,
+il secondo contiene gli stati finali di tutti i problemi generati
+dopo aver applicato il backtracking (il quale applica l'algoritmo
+di consistenza indicato da \emph{algoConsistenza}).
+
+
+\section{Risultati}
+
+Di seguito i grafici dei tempi d'esecuzione in funzione del numero
+di variabili dei problemi. I tempi sono stati ottenuti generando e
+risolvendo per ogni istanza 100 problemi casuali e facendo una media
+dei loro relativi tempi d'esecuzione.
+
+\includegraphics[scale=0.8]{/Users/simonetiso/Documents/workspace/all-different/docs/grafo}
+
+\includegraphics[scale=0.8]{/Users/simonetiso/Documents/workspace/all-different/docs/grafo2}
+
+
+\section{Consuntivo}
+
+Di seguito sono inserite le ore di consuntivo per lo sviluppo di
+questo progetto per un totale di 25 ore per ciascun membro del gruppo.
+
+\includegraphics[scale=0.5]{/Users/simonetiso/Documents/workspace/all-different/docs/attività}
+
+
+\section{Conclusioni e sviluppi futuri}
+
+Come si può vedere dai grafici dei tempi d'esecuzione solo applicando
+l'algoritmo di arcConsistency si riescono ad ottenere delle soluzioni
+in un tempo accettabile. Questo è dovuto al fatto che abbiamo implementato
+gli algoritmi di consistenza così com'erano nella loro definizione
+{}``ufficiale''. Il risultato più sorprendente che non ci aspettavamo,
+è relativo al confronto tra l'algoritmo arcConsistency ed hyperArcConsistency,
+il primo infatti ha una complessità computazionale maggiore del secondo
+e minore anche degli altri algoritmi considerati, ma nonostante questo
+hyperArcConsistency ha dei tempi di esecuzione maggiori. Questo è
+probabilmente dovuto ad un overhead nell'uso delle librerie jgrapht.
+Se avessimo avuto più tempo, potrebbe essere stato interessante implementare
+altri algoritmi come quello di Bartàk del 2003.
 \end{document}
